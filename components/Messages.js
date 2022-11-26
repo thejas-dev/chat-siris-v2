@@ -93,10 +93,10 @@ export default function Messages({session}) {
 			let byUserName = currentUser.username;
 			let byUserImage = currentUser.avatarImage;
 			const message = userMessage
+			setUserMessage('');
 			const {data} = await axios.post(sendMessageRoutes,{
 				group,message,byUserName,byUserImage
 			})
-			setUserMessage('');
 			// console.log(data)
 			const dataRef = {
 				group:group,
