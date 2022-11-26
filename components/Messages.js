@@ -580,12 +580,12 @@ export default function Messages({session}) {
 
 			{	
 				groupSelected ? 
-				<div className={`w-full h-[90%] relative`} >
+				<div className={`w-full md:h-[90%] h-[92%] relative`} >
 				<img src={currentUser?.backgroundImage ? currentUser?.backgroundImage : "" } alt="" className="h-full w-full absolute opacity-40 z-0"/>
 				<div className={`w-full h-full ${currentUser?.backgroundImage ? "bg-black z-40" : "" } `} > 
 				<div className=" relative md:px-[70px] px-5 flex flex-col w-full h-full relative " >
 					<div className="flex flex-grow flex-col md:py-10 py-3 gap-8 overflow-x-hidden
-					 scrollbar-thin scrollbar-rounded-lg scrollbar-thumb-blue-600 scrollbar-track-gray-700 overflow-scroll">
+					 scrollbar-none overflow-scroll">
 						{
 							messages?.map((msg)=>(
 								<MessageCard msg={msg} scrollRef={scrollRef} key={msg._id} tConvert={tConvert} />
