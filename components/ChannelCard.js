@@ -1,5 +1,6 @@
 import {BsChevronRight} from 'react-icons/bs'
-import {currentChannelState,groupSelectedState,revealMenuState,currentUserState} from '../atoms/userAtom'
+import {currentChannelState,groupSelectedState,revealMenuState,
+	currentUserState,channelAdminState} from '../atoms/userAtom'
 import {useRecoilState} from 'recoil';
 import axios from 'axios';
 import {addUserToChannel,addChannelToUser,fetchUserRoom} from '../utils/ApiRoutes';
@@ -10,10 +11,11 @@ export default function ChannelCard({channel}) {
 	const [currentChannel,setCurrentChannel] = useRecoilState(currentChannelState);
 	const [groupSelected,setGroupSelected] = useRecoilState(groupSelectedState);
 	const [revealMenu,setRevealMenu] = useRecoilState(revealMenuState);
-	const [currentUser,setCurrentUser] = useRecoilState(currentUserState)
+	const [currentUser,setCurrentUser] = useRecoilState(currentUserState);
+	const [channelAdmin,setChannelAdmin] = useRecoilState(channelAdminState);
 
 	const addUserToChannelFun = async() =>{
-		let name = channel.name
+		let name = channel.name;
 		let needToUpdate = true;
 		const data1 = await axios.post(fetchUserRoom,{
 			name
@@ -36,7 +38,10 @@ export default function ChannelCard({channel}) {
 			let data2 = await axios.post(`${addChannelToUser}/${currentUser._id}`,{
 				inChannel
 			})
-			setCurrentUser(data2.data.obj)
+			setCurrentUser(data2.data.obj);
+			if(channel.adminId===currentUser._id){
+				setChannelAdmin(true);
+			}			
 		}
 	}
 

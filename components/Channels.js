@@ -2,7 +2,7 @@ import {useState,useEffect} from 'react'
 import {BiSearchAlt2} from 'react-icons/bi';
 import axios from 'axios'
 import {useRecoilState} from 'recoil'
-import {currentUserState,revealMenuState,allChannelsState,searchChannelsState,
+import {currentUserState,revealMenuState,allChannelsState,searchChannelsState,channelAdminState,
 	currentChannelState,groupSelectedState,userMessageState,loaderState,loaderState2,
 	loaderState3,loaderState4,loaderState5,loaderState6} from '../atoms/userAtom'
 import {CgChevronUp,CgChevronDown} from 'react-icons/cg'
@@ -31,7 +31,8 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 	const [allChannels,setAllChannels] = useRecoilState(allChannelsState)
 	const [currentChannel,setCurrentChannel] = useRecoilState(currentChannelState);
 	const [groupSelected,setGroupSelected] = useRecoilState(groupSelectedState);
-	const [searchChannels,setSearchChannels] = useRecoilState(searchChannelsState)
+	const [searchChannels,setSearchChannels] = useRecoilState(searchChannelsState);
+	const [channelAdmin,setChannelAdmin] = useRecoilState(channelAdminState);
 	const [message,setMessage] = useState(userMessageState);
 	const [loader1,setLoader1] = useRecoilState(loaderState);
 	const [loader2,setLoader2] = useRecoilState(loaderState2);
@@ -69,10 +70,13 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		})
 		// console.log(data)
 		if(data.status === true){
-			setGroupSelected(true)
-			setCurrentChannel(data.data)
+			setGroupSelected(true);
+			setCurrentChannel(data.data);
 			const channelRef = data.data;
 			socket.emit('addUserToChannel',channelRef);
+			if(data.data.adminId === currentUser._id){
+				setChannelAdmin(true);
+			}
 			// console.log(data)
 		}
 		// console.log(data)
@@ -113,6 +117,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 				setCurrentUser(data.obj);
 				setCurrentChannel('');
 				fetch();
+				setChannelAdmin(false);
 				setGroupSelected(false);				
 			}else{
 				toast('Please Wait',toastOptions)

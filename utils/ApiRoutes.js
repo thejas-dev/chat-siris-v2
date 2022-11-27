@@ -14,3 +14,4 @@ export const updateBackground = `${host}/api/auth/deleteBackground`;
 export const updateName = `${host}/api/auth/updateName`;
 export const updateAvatarImage = `${host}/api/auth/updateAvatar`;
 export const findChannelRoute = `${host}/api/auth/findChannelRoute`;
+export const deleteMessageRoute =  `${host}/api/auth/deleteMessage`;

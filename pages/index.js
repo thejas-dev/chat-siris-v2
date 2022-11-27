@@ -14,7 +14,7 @@ import axios from 'axios';
 import Image from 'next/image';
 import {TfiGallery} from 'react-icons/tfi'
 import {useRecoilState} from 'recoil'
-import {currentUserState,currentChannelState,groupSelectedState} from '../atoms/userAtom'
+import {currentUserState,currentChannelState,groupSelectedState,channelAdminState} from '../atoms/userAtom'
 import {socket} from '../service/socket';
 import {VscCloseAll} from 'react-icons/vsc'
 import ImageKit from "imagekit"
@@ -41,6 +41,7 @@ const Home = () => {
   const [currentUser,setCurrentUser] = useRecoilState(currentUserState)
   const [currentChannel,setCurrentChannel] = useRecoilState(currentChannelState);
   const [groupSelected,setGroupSelected] = useRecoilState(groupSelectedState);
+  const [channelAdmin,setChannelAdmin] = useRecoilState(channelAdminState);
   const [deleteConfirm,setDeleteConfirm] = useState(false);
   const [privacy,setPrivacy] = useState(false);
   const [userName,setUserName] = useState('');
@@ -232,11 +233,12 @@ const Home = () => {
           let name = channelName;
           let description = channelDescription;
           let admin = currentUser.username;
+          let adminId = currentUser._id;
           let users = []
           users.push(currentUser);
           setChannelName('');setChannelDescription('');
           const {data} = await axios.post(createChannelRoutes,{
-            name,description,admin,users,privacy
+            name,description,admin,adminId,users,privacy
           })
           if(data.status === true){
             setCurrentChannel(data.group);
@@ -248,6 +250,7 @@ const Home = () => {
           })
           setCurrentUser(data2.data.obj);
           setGroupSelected(true);
+          setChannelAdmin(true);
           socket.emit('refetchChannels');
           handleClose();
       }else{

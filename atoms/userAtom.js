@@ -74,3 +74,8 @@ export const searchChannelsState = atom({
 	key:"searchChannelsState",
 	default:""
 })
+
+export const channelAdminState = atom({
+	key:"channelAdminState",
+	default:false
+})

@@ -3,9 +3,11 @@ import {FiDownload} from 'react-icons/fi';
 import {GiZipper} from 'react-icons/gi';
 import {VscJson} from 'react-icons/vsc';
 import {useState} from 'react';
+import {AiOutlineDelete} from 'react-icons/ai'
 
-export default function MessageCard({msg,scrollRef,tConvert}) {
-	const [reveal,setReveal] = useState(false)
+export default function MessageCard({msg,scrollRef,tConvert,channelAdmin,deleteMessage}) {
+	const [reveal,setReveal] = useState(false);
+
 
 	return(
 		<div ref={scrollRef} >
@@ -13,15 +15,21 @@ export default function MessageCard({msg,scrollRef,tConvert}) {
 				<img src={msg.byUserImage} className="h-11 w-11 rounded-xl mb-1" />
 				<div className="flex gap-1 flex-col ml-5" loading="lazy">
 					<div className="flex gap-5" >	
-						<p className="text-[#828282] font-semibold" >{msg.byUserName}</p>
+						<p className="text-[#828282] font-semibold truncate" >{msg.byUserName}</p>
+						<div className="flex gap-2" >
+						{channelAdmin && <AiOutlineDelete 
+						onClick={()=>{deleteMessage(msg._id)}}
+						className="md:h-6 h-5 w-5 md:w-6 h-5 w-5 text-gray-300 hover:scale-110 transition cursor-pointer 
+						duration-400 ease-in-out hover:text-sky-400"/> }
 						<button className="text-[#828282]/80 cursor-pointer" onClick={()=>setReveal(!reveal)}>
 							{tConvert(msg?.createdAt)} {reveal && <>, {msg?.createdAt?.split('T')[0]}</>} 
 						</button>
+						</div>
 					</div>
 					{
 						msg.message.text.includes('https://ik.imagekit.io/d3kzbpbila') ? 
 							msg.message.text.includes('https://ik.imagekit.io/d3kzbpbila/Audios') ?
-								<audio src={msg.message.text} controls className="rounded-xl border-[2px] border-orange-300/70 
+								<audio src={msg.message.text} controls className="rounded-xl md:border-[2px] md:border-orange-300/70 
 								shadow-lg shadow-orange-500/70 bg-black/40 " loading="lazy" />
 							:
 							msg.message.text.includes('https://ik.imagekit.io/d3kzbpbila/Videos') ?

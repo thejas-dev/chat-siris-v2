@@ -1,7 +1,7 @@
 import {useRecoilState} from 'recoil'
 import {useState,useEffect,useRef} from 'react'
 import ImageKit from "imagekit"
-import {currentUserState,groupSelectedState,revealMenuState,
+import {currentUserState,groupSelectedState,revealMenuState,channelAdminState,
 	currentChannelState,messageState,userMessageState,loaderState,loaderState2,
 	loaderState3,loaderState4,loaderState5,loaderState6} from '../atoms/userAtom'
 import robot from '../assets/robot.gif';
@@ -14,7 +14,7 @@ import {FiMusic} from 'react-icons/fi';
 import {RiSendPlaneFill} from 'react-icons/ri';
 import {ImFileZip} from 'react-icons/im'
 import {SiJson} from 'react-icons/si';
-import {sendMessageRoutes,getMessageRoutes,host} from '../utils/ApiRoutes';
+import {sendMessageRoutes,getMessageRoutes,deleteMessageRoute,host} from '../utils/ApiRoutes';
 import {socket} from '../service/socket';
 import axios from 'axios'
 import {ImAttachment} from 'react-icons/im'
@@ -31,7 +31,8 @@ export default function Messages({session}) {
 	const [currentChannel,setCurrentChannel] = useRecoilState(currentChannelState)
 	const scrollRef = useRef();
 	const [userMessage,setUserMessage] = useRecoilState(userMessageState);
-	const [messages,setMessages] = useRecoilState(messageState)
+	const [messages,setMessages] = useRecoilState(messageState);
+	const [channelAdmin,setChannelAdmin] = useRecoilState(channelAdminState);
 	const [revealMedia,setRevealMedia] = useState(false)
 	const [loader1,setLoader1] = useRecoilState(loaderState);
 	const [loader2,setLoader2] = useRecoilState(loaderState2);
@@ -97,13 +98,11 @@ export default function Messages({session}) {
 			const {data} = await axios.post(sendMessageRoutes,{
 				group,message,byUserName,byUserImage
 			})
-			// console.log(data)
 			const dataRef = {
 				group:group,
 				data:data
 			}
 			socket.emit('add-msg',dataRef);
-			// setMessages(current => [...current,data?.data]);
 		}
 	} 
 
@@ -131,14 +130,18 @@ export default function Messages({session}) {
 	},[currentUser])
 
 	useEffect(()=>{
-			// console.log("worked")
 			socket.on('msg-recieve',(data)=>{
-				// console.log("data recieved")
 				setMessages(current => [...current,data?.data]);
-				// getChat()
+			});
+			socket.on('fetchMessages',async(group)=>{
+				const {data} = await axios.post(getMessageRoutes,{
+					group
+				});
+				setMessages(data.data)
 			})
 			return ()=>{
 				socket.off('msg-recieve');
+				socket.off('fetchMessages');
 			}
 	},[])
 
@@ -155,13 +158,25 @@ export default function Messages({session}) {
 		const {data} = await axios.post(getMessageRoutes,{
 			group
 		});
-		// console.log(data)
+		console.log(data)
 		setMessages(data.data)
 	};
 
 	useEffect(()=>{
 		scrollRef.current?.scrollIntoView({behaviour:"smooth"});
-	},[messages])
+	},[messages]);
+
+
+	const deleteMessage = async(id) => {
+		const {data} = await axios.post(deleteMessageRoute,{
+			id
+		})
+		let group = currentChannel?.name;
+		const dataRef = {
+			group:group,
+		}
+		socket.emit('refetchMessages',dataRef)
+	}
 
 	const url1Setter = () =>{
 		
@@ -575,7 +590,7 @@ export default function Messages({session}) {
 					className="h-7 md:hidden  w-7 text-white/80 cursor-pointer" />					
 				}
 				<img src={currentUser?.avatarImage} className={`h-11 md:ml-7 w-11 ${revealMenu ? "hidden" : ""} rounded-full`}/>
-				<p className={`text-xl ${revealMenu ? "hidden" : ""} text-white font-semibold md:ml-1  truncate`}>{ groupSelected ? currentChannel.name : currentUser?.username}</p>
+				<p className={`text-xl ${revealMenu ? "hidden" : ""} text-white font-semibold md:ml-1  truncate`}>{ groupSelected ? currentChannel?.name : currentUser?.username}</p>
 			</header>
 
 			{	
@@ -588,7 +603,8 @@ export default function Messages({session}) {
 					 scrollbar-none overflow-scroll">
 						{
 							messages?.map((msg)=>(
-								<MessageCard msg={msg} scrollRef={scrollRef} key={msg._id} tConvert={tConvert} />
+								<MessageCard msg={msg} scrollRef={scrollRef} key={msg._id} tConvert={tConvert} 
+								deleteMessage={deleteMessage} channelAdmin={channelAdmin} />
 							))
 						}
 					</div>
