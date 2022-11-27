@@ -242,6 +242,8 @@ const Home = () => {
           })
           if(data.status === true){
             setCurrentChannel(data.group);
+            const channelRef = data.group;
+            socket.emit('addUserToChannel',channelRef);
           }
           const inChannel = name;
           admin = name;
