@@ -1,4 +1,4 @@
-export const host = "https://chat-siris-v2-server2.onrender.com";
+export const host = process.env.NEXT_PUBLIC_SERVER_BASE
 
 export const registerRoutes = `${host}/api/auth/register`;
 export const loginRoutes = `${host}/api/auth/login`;
