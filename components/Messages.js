@@ -158,7 +158,7 @@ export default function Messages({session}) {
 		const {data} = await axios.post(getMessageRoutes,{
 			group
 		});
-		console.log(data)
+		// console.log(data)
 		setMessages(data.data)
 	};
 

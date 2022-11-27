@@ -348,7 +348,7 @@ const Home = () => {
           onClick={handleClose3}
           />
           <div className="relative">
-            <img src={currentUser?.avatarImage} alt="" className="h-40 w-40 rounded-full shadow-lg shadow-yellow-500/80" alt=""/>
+            <img src={currentUser?.avatarImage} alt=" " className="h-40 w-40 rounded-full shadow-lg shadow-yellow-500/80"/>
             {
               !currentUser?.inChannel ?
               revealAvatarSettings ?

@@ -33,7 +33,6 @@ export default function Login({providers}) {
 		const {data} = await axios.post(loginRoutes,{
 			email,
 		});
-		// console.log(data)
 		if(data.status === false){
 			const {data} = await axios.post(registerRoutes,{
 				username,

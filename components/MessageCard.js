@@ -29,7 +29,7 @@ export default function MessageCard({msg,scrollRef,tConvert,channelAdmin,deleteM
 					{
 						msg.message.text.includes('https://ik.imagekit.io/d3kzbpbila') ? 
 							msg.message.text.includes('https://ik.imagekit.io/d3kzbpbila/Audios') ?
-								<audio src={msg.message.text} controls className="rounded-xl md:border-[2px] md:border-orange-300/70 
+								<audio src={msg.message.text} controls className="md:rounded-xl rounded-full md:border-[2px] md:border-orange-300/70 
 								shadow-lg shadow-orange-500/70 bg-black/40 " loading="lazy" />
 							:
 							msg.message.text.includes('https://ik.imagekit.io/d3kzbpbila/Videos') ?
