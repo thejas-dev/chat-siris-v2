@@ -13,7 +13,7 @@ export default function MessageCard({msg,scrollRef,tConvert,channelAdmin,deleteM
 		<div ref={scrollRef} >
 			<p className="text-white flex ">
 				<img src={msg.byUserImage} className="h-11 w-11 rounded-xl mb-1" />
-				<div className="flex gap-1 flex-col ml-5" loading="lazy">
+				<div className="flex gap-1 flex-col ml-[10px] md:ml-5" loading="lazy">
 					<div className="flex gap-5" >	
 						<p className="text-[#828282] font-semibold truncate" >{msg.byUserName}</p>
 						<div className="flex gap-2" >
