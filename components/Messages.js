@@ -598,7 +598,7 @@ export default function Messages({session}) {
 				<div className={`w-full md:h-[90%] h-[92%] relative`} >
 				{currentUser?.backgroundImage && <img src={currentUser?.backgroundImage ? currentUser?.backgroundImage : "sir" } alt=" " className="h-full w-full absolute opacity-40 z-0"/>}
 				<div className={`w-full h-full ${currentUser?.backgroundImage ? "bg-black z-40" : "" } `} > 
-				<div className=" relative md:px-[70px] px-2 flex flex-col w-full h-full relative " >
+				<div className=" relative md:px-[70px] px-[10px] flex flex-col w-full h-full relative " >
 					<div className="flex flex-grow flex-col md:py-10 py-3 gap-8 overflow-x-hidden
 					 scrollbar-none overflow-scroll">
 						{
