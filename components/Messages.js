@@ -147,21 +147,20 @@ export default function Messages({session}) {
 	},[])
 
 
-	// useEffect(()=>{
-	// 	if(currentChannel !== {}){
-	// 		getChat();
-	// 		if(currentChannel?.adminOnly){
-	// 			setChannelAdminOnly(true);
-	// 			if(currentChannel?.adminId !== currentUser._id){
-	// 				setUserMessage('');
-	// 				setRevealMedia(false);
-	// 				stop();
-	// 			}
-	// 		}else{
-	// 			setChannelAdminOnly(false);
-	// 		}
-	// 	}
-	// },[currentChannel])
+	useEffect(()=>{
+		if(currentChannel !== {}){
+			getChat();
+			if(currentChannel?.adminOnly){
+				setChannelAdminOnly(true);
+				if(currentChannel?.adminId !== currentUser._id){
+					setUserMessage('');
+					setRevealMedia(false);
+				}
+			}else{
+				setChannelAdminOnly(false);
+			}
+		}
+	},[currentChannel])
 
 
 	const getChat = async() =>{
