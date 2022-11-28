@@ -76,12 +76,12 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 			name
 		})
 		// console.log(data)
-		if(data.status === true){
+		if(data?.status === true){
 			setGroupSelected(true);
-			setCurrentChannel(data.data);
-			const channelRef = data.data;
+			setCurrentChannel(data?.data);
+			const channelRef = data?.data;
 			socket.emit('addUserToChannel',channelRef);
-			if(data.data.adminId === currentUser._id){
+			if(data?.data?.adminId === currentUser?._id){
 				setChannelAdmin(true);
 			}
 			// console.log(data)
