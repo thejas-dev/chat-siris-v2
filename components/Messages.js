@@ -1,7 +1,7 @@
 import {useRecoilState} from 'recoil'
 import {useState,useEffect,useRef} from 'react'
 import ImageKit from "imagekit"
-import {currentUserState,groupSelectedState,revealMenuState,channelAdminState,
+import {currentUserState,groupSelectedState,revealMenuState,channelAdminState,channelAdminOnlyState,
 	currentChannelState,messageState,userMessageState,loaderState,loaderState2,
 	loaderState3,loaderState4,loaderState5,loaderState6} from '../atoms/userAtom'
 import robot from '../assets/robot.gif';
@@ -33,6 +33,7 @@ export default function Messages({session}) {
 	const [userMessage,setUserMessage] = useRecoilState(userMessageState);
 	const [messages,setMessages] = useRecoilState(messageState);
 	const [channelAdmin,setChannelAdmin] = useRecoilState(channelAdminState);
+	const [channelAdminOnly,setChannelAdminOnly] = useRecoilState(channelAdminOnlyState)
 	const [revealMedia,setRevealMedia] = useState(false)
 	const [loader1,setLoader1] = useRecoilState(loaderState);
 	const [loader2,setLoader2] = useRecoilState(loaderState2);
@@ -149,6 +150,16 @@ export default function Messages({session}) {
 	useEffect(()=>{
 		if(currentChannel !== {}){
 			getChat();
+			if(currentChannel.adminOnly){
+				setChannelAdminOnly(true);
+				if(currentChannel.adminId !== currentUser._id){
+					setUserMessage('');
+					setRevealMedia(false);
+					stop();
+				}
+			}else{
+				setChannelAdminOnly(false);
+			}
 		}
 	},[currentChannel])
 
@@ -484,14 +495,16 @@ export default function Messages({session}) {
 
 
 	const start = async() => {
-		if(!uploading){
-		  	await navigator.mediaDevices.getUserMedia({ audio: true }).then(()=>{
-		  		setIsBlocked(false)
-		    	record();
-		  	}).catch((err)=>{
-		  		toast('Microphone Permission Denied',toastOptions);
-		  		setIsBlocked(true);
-		  	})			
+		if(!channelAdminOnly || channelAdmin){
+			if(!uploading){
+			  	await navigator.mediaDevices.getUserMedia({ audio: true }).then(()=>{
+			  		setIsBlocked(false)
+			    	record();
+			  	}).catch((err)=>{
+			  		toast('Microphone Permission Denied',toastOptions);
+			  		setIsBlocked(true);
+			  	})			
+			}
 		}
   };
 
@@ -611,18 +624,24 @@ export default function Messages({session}) {
 					<div className={`w-full p-5 gap-2 mb-5 rounded-xl ${currentUser.backgroundImage ? "bg-[#3C393F]/70" : "bg-[#3C393F]"} `}>
 					<form className="flex items-center" onSubmit={(e)=>{e.preventDefault();sendMessage()}} >	
 						<ImAttachment 
-						onClick={()=>{setRevealMedia(!revealMedia)}}
+						onClick={()=>{
+							if(!channelAdminOnly || channelAdmin){
+								setRevealMedia(!revealMedia);
+							}
+						}}
 						className="h-5 w-5 text-[#FFFFFF]/80 hover:scale-110 hover:text-sky-500 transform
 						transition duration-300 ease-out cursor-pointer" />
 						<input type="text"
 						onChange={(e)=>{
 							if(!isRecording){
-								setUserMessage(e.target.value)
+								if(!channelAdminOnly || channelAdmin){
+									setUserMessage(e.target.value);
+								}
 							}
 						}}
 						value={userMessage} 
 						className="outline-none text-[#E0E0E0]/90 ml-[6px] md:ml-2 w-full bg-transparent"
-						placeholder="Type a message here"
+						placeholder={!channelAdminOnly || channelAdmin ? "Type a message here":"Admin Only Chat"}
 						/>
 						{
 							userMessage ? 

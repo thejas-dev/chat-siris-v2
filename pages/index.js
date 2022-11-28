@@ -234,11 +234,12 @@ const Home = () => {
           let description = channelDescription;
           let admin = currentUser.username;
           let adminId = currentUser._id;
+          const adminOnly = false;
           let users = []
           users.push(currentUser);
           setChannelName('');setChannelDescription('');
           const {data} = await axios.post(createChannelRoutes,{
-            name,description,admin,adminId,users,privacy
+            name,description,admin,adminId,adminOnly,users,privacy
           })
           if(data.status === true){
             setCurrentChannel(data.group);

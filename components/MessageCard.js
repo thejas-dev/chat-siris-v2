@@ -7,6 +7,7 @@ import {AiOutlineDelete} from 'react-icons/ai'
 
 export default function MessageCard({msg,scrollRef,tConvert,channelAdmin,deleteMessage}) {
 	const [reveal,setReveal] = useState(false);
+	const [deleted,setDeleted] = useState(false);
 
 
 	return(
@@ -17,10 +18,14 @@ export default function MessageCard({msg,scrollRef,tConvert,channelAdmin,deleteM
 					<div className="flex gap-5" >	
 						<p className="text-[#828282] font-semibold truncate" >{msg.byUserName}</p>
 						<div className="flex gap-2" >
-						{channelAdmin && <AiOutlineDelete 
-						onClick={()=>{deleteMessage(msg._id)}}
-						className="md:h-6 h-5 w-5 md:w-6 h-5 w-5 text-gray-300 hover:scale-110 transition cursor-pointer 
-						duration-400 ease-in-out hover:text-sky-400"/> }
+						{channelAdmin &&
+						<AiOutlineDelete 
+						onClick={()=>{
+							deleteMessage(msg._id);
+							setDeleted(true);
+						}}
+						className={`md:h-6 h-5 w-5 md:w-6 h-5 w-5 text-gray-300 hover:scale-110 transition 
+						${deleted ? "hidden" : ""} cursor-pointer duration-400 ease-in-out hover:text-sky-400`}/> }
 						<button className="text-[#828282]/80 cursor-pointer" onClick={()=>setReveal(!reveal)}>
 							{tConvert(msg?.createdAt)} {reveal && <>, {msg?.createdAt?.split('T')[0]}</>} 
 						</button>

@@ -13,12 +13,16 @@ import {
 import {AiOutlinePicture,AiOutlineLogout} from 'react-icons/ai'
 import Divider from '@mui/material/Divider';
 import {getAllChannelsRoutes,fetchUserRoom,addChannelToUser,addUserToChannel,
-	findChannelRoute} from '../utils/ApiRoutes';
+	findChannelRoute,changeAdminOnlyRoute} from '../utils/ApiRoutes';
 import ChannelCard from './ChannelCard';
 import {signOut} from 'next-auth/react';
 import {socket} from '../service/socket';
 import {toast,ToastContainer} from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'
+import 'react-toastify/dist/ReactToastify.css';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch, { SwitchProps } from '@mui/material/Switch';
+import { styled } from '@mui/material/styles';
 
 
 export default function Channels({session,handleClose,handleToggle,handleToggle2,handleClose2,handleToggle3,handleClose3}) {
@@ -48,7 +52,10 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 				fetch();
 			})
 			socket.on('channelUpdate',(channelRef)=>{
-				setCurrentChannel(channelRef)
+				setCurrentChannel(channelRef);
+			})
+			socket.on('channelDetailsUpdate',(data)=>{
+				setCurrentChannel(data);
 			})
 		}
 	},[])
@@ -157,6 +164,51 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		draggable:true,
 		theme:"light",
 	}
+
+	const handleAdminOnlyChange = async(e) => {
+		const adminOnly = e.target.checked;
+		const {data} = await axios.post(`${changeAdminOnlyRoute}/${currentChannel._id}`,{
+			adminOnly
+		})
+		// console.log(data);
+		setCurrentChannel(data.obj);
+		socket.emit('channelUpdate',data.obj);
+	}
+
+
+	const Android12Switch = styled(Switch)(({ theme }) => ({
+	  padding: 8,
+	  '& .MuiSwitch-track': {
+	    borderRadius: 22 / 2,
+	    '&:before, &:after': {
+	      content: '""',
+	      position: 'absolute',
+	      top: '50%',
+	      transform: 'translateY(-50%)',
+	      width: 16,
+	      height: 16,
+	    },
+	    '&:before': {
+	      backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+	        theme.palette.getContrastText(theme.palette.primary.main),
+	      )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
+	      left: 12,
+	    },
+	    '&:after': {
+	      backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+	        theme.palette.getContrastText(theme.palette.primary.main),
+	      )}" d="M19,13H5V11H19V13Z" /></svg>')`,
+	      right: 12,
+	    },
+	  },
+	  '& .MuiSwitch-thumb': {
+	    boxShadow: 'none',
+	    width: 16,
+	    height: 16,
+	    margin: 2,
+	  },
+	}));
+
 	return(
 
 		<div className={`overflow-hidden md:w-[22%] w-0 ${revealMenu ? "w-[80%]  transform transition-width duration-500 ease-in-out" : "w-[0%] transform transition-width duration-500 ease-in-out" } h-screen relative bg-[#120F13] relative`}>
@@ -186,6 +238,17 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 					currentChannel ?
 						<div className="w-full p-3 flex flex-col gap-5 rounded-lg" >
 							<h1 className="text-xl font-semibold text-white truncate" >{currentChannel.name} </h1>
+							{
+								currentChannel.adminId === currentUser._id &&
+								<div className="flex items-center" >
+									<FormControlLabel
+								        control={<Android12Switch defaultChecked />}
+								        checked={currentChannel.adminOnly}
+								        onChange={handleAdminOnlyChange}
+								    />
+								    <p className="text-md font-semibold text-white">Admin Only Chat</p>
+							    </div>
+							}
 							<div className="flex gap-2 w-full" >
 								<h1 className="text-md text-gray-400/70 truncate">Created By :-</h1>
 								<p className="text-gray-400 text-lg truncate" >{currentChannel?.admin}</p>
@@ -200,7 +263,16 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 										className="flex gap-4 items-center w-full cursor-pointer hover:bg-gray-900/70 transition
 										duration-300 ease-out p-2 rounded-xl" >
 											<img src={user.avatarImage} className="h-11 w-11 rounded-lg"/>
-											<p className="text-gray-700 text-lg font-semibold truncate">{user.username}</p>
+											{
+												currentChannel.adminId === user._id ?
+												<div className="flex flex-col gap-[3px]" >
+													<p className="text-gray-700 text-lg font-semibold truncate">{user.username}</p>
+													<p className="text-gray-800 text-sm font-semibold truncate">🟢 Admin</p>
+												</div>
+												:
+												<p className="text-gray-700 text-lg font-semibold truncate">{user.username}</p>
+
+											}
 										</div>
 									))
 								}
