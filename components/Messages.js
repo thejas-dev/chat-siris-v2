@@ -576,7 +576,7 @@ export default function Messages({session}) {
 	}
 
 	return(
-		<div className={`md:w-[78%] flex flex-col overflow-hidden ${revealMenu ? "w-[20%]  transform transition-width duration-500 ease-in-out" : "w-[100%] transform transition-width duration-500 ease-in-out" } h-screen relative bg-[#333333]`} >
+		<div className={`md:w-[78%] overflow-hidden ${revealMenu ? "w-[20%]  transform transition-width duration-500 ease-in-out" : "w-[100%] transform transition-width duration-500 ease-in-out" } h-screen relative bg-[#333333]`} >
 			<ToastContainer/>
 			<header className="w-full flex p-[10px] shadow-md shadow-black/50 gap-4 z-50 items-center " >	
 				{
@@ -595,7 +595,7 @@ export default function Messages({session}) {
 
 			{	
 				groupSelected ? 
-				<div className={`w-full md:h-[90%] grow md:grow-0 relative`} >
+				<div className={`w-full md:h-[90%] h-[92%] relative`} >
 				{currentUser?.backgroundImage && <img src={currentUser?.backgroundImage ? currentUser?.backgroundImage : "sir" } alt=" " className="h-full w-full absolute opacity-40 z-0"/>}
 				<div className={`w-full h-full ${currentUser?.backgroundImage ? "bg-black z-40" : "" } `} > 
 				<div className=" relative md:px-[70px] px-2 flex flex-col w-full h-full relative " >
