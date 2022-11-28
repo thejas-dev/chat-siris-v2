@@ -33,7 +33,7 @@ export default function MessageCard({msg,scrollRef,tConvert,channelAdmin,deleteM
 								shadow-lg shadow-orange-500/70 bg-black/40 " loading="lazy" />
 							:
 							msg.message.text.includes('https://ik.imagekit.io/d3kzbpbila/Videos') ?
-							<video width="290" height="240" 
+							<video width="305" height="240" 
 							loading="lazy"
 							src={msg.message.text} controls className="shadow-lg shadow-green-500/70 rounded-xl" />
 							:
