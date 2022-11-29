@@ -40,17 +40,20 @@ export default function Login({providers}) {
 				avatarImage,
 				isAvatarImageSet,
 			})
-			setCurrentUser(data?.user)
 			if(!localStorage.getItem('chat-siris-2')){
 				localStorage.setItem('chat-siris-2',JSON.stringify(data?.user?.username));
 			}
+			setCurrentUser(data?.user,()=>{
+				router.push('/');
+			})
 		}else{
-			setCurrentUser(data?.user)
 			if(!localStorage.getItem('chat-siris-2')){
 				localStorage.setItem('chat-siris-2',JSON.stringify(data?.user?.username));
 			}
+			setCurrentUser(data?.user,()=>{
+				router.push('/');
+			});			
 		}
-		router.push('/')
 	}
 
 
