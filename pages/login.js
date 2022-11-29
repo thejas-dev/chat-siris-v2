@@ -25,6 +25,10 @@ export default function Login({providers}) {
 		}
 	},[session])
 
+	const redirect = () =>{
+		router.push('/')
+	}
+
 	const handleValidation = async() =>{
 		let username = session?.user.name
 		let email = session?.user.email
@@ -43,14 +47,15 @@ export default function Login({providers}) {
 			if(!localStorage.getItem('chat-siris-2')){
 				localStorage.setItem('chat-siris-2',JSON.stringify(data?.user?.username));
 			}
-			setCurrentUser(data?.user);
-			router.push('/');
+			setCurrentUser(data.user);
+			console.log(data.user);
+			redirect();
 		}else{
 			if(!localStorage.getItem('chat-siris-2')){
 				localStorage.setItem('chat-siris-2',JSON.stringify(data?.user?.username));
 			}
 			setCurrentUser(data?.user);
-			router.push('/');
+			redirect();
 		}
 	}
 
