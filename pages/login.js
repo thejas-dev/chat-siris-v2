@@ -43,16 +43,14 @@ export default function Login({providers}) {
 			if(!localStorage.getItem('chat-siris-2')){
 				localStorage.setItem('chat-siris-2',JSON.stringify(data?.user?.username));
 			}
-			setCurrentUser(data?.user,()=>{
-				router.push('/');
-			})
+			setCurrentUser(data?.user);
+			router.push('/');
 		}else{
 			if(!localStorage.getItem('chat-siris-2')){
 				localStorage.setItem('chat-siris-2',JSON.stringify(data?.user?.username));
 			}
-			setCurrentUser(data?.user,()=>{
-				router.push('/');
-			});			
+			setCurrentUser(data?.user);
+			router.push('/');
 		}
 	}
 
