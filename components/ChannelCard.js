@@ -45,10 +45,17 @@ export default function ChannelCard({channel}) {
 		}
 	}
 
+	const joinChannel = () =>{
+		setCurrentChannel(channel);
+		setGroupSelected(true);
+		addUserToChannelFun();
+		setRevealMenu(false);
+	}
+
 
 	return(
 		<div 
-		onClick={()=>{setCurrentChannel(channel);setGroupSelected(true);setRevealMenu(false);addUserToChannelFun();}}
+		onClick={()=>{joinChannel()}}
 		className="flex w-full cursor-pointer ease-out transition duration-300
 		hover:bg-gray-700 p-2 py-4 rounded-xl justify-between items-center" >	
 			<div className="flex gap-2 items-center " >
