@@ -104,7 +104,7 @@ export default function ChannelCard({channel}) {
 		hover:bg-gray-700 p-2 py-4 rounded-xl justify-between items-center z-10" >	
 			<div className="flex gap-2 items-center " >
 				{
-					passTabOpen ? 
+					passTabOpen && markChannel ? 
 					""
 					:
 					<button className="px-3 py-2 rounded-xl text-white
