@@ -34,6 +34,11 @@ export const currentChannelState = atom({
 	default:""
 })
 
+export const passTabOpenState = atom({
+	key:"passTabOpenState",
+	default:''
+})
+
 
 export const loaderState = atom({
 	key:"loaderState",
@@ -83,4 +88,9 @@ export const channelAdminState = atom({
 export const channelAdminOnlyState = atom({
 	key:"channelAdminOnlyState",
 	default:false
+})
+
+export const entryPassState = atom({
+	key:"entryPassState",
+	default:''
 })

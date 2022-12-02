@@ -16,11 +16,15 @@ import {TfiGallery} from 'react-icons/tfi'
 import {useRecoilState} from 'recoil'
 import {currentUserState,currentChannelState,groupSelectedState,channelAdminState} from '../atoms/userAtom'
 import {socket} from '../service/socket';
-import {VscCloseAll} from 'react-icons/vsc'
+import {VscCloseAll} from 'react-icons/vsc';
 import ImageKit from "imagekit"
 import {toast,ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
 import TextField from '@mui/material/TextField';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch, { SwitchProps } from '@mui/material/Switch';
+import { styled } from '@mui/material/styles';
 
 const Home = () => {
     const router = useRouter();
@@ -35,7 +39,8 @@ const Home = () => {
   const [open2, setOpen2] = useState(false);
   const [open3, setOpen3] = useState(false);
   const [channelName,setChannelName] = useState('')
-  const [channelDescription,setChannelDescription] = useState('')
+  const [channelDescription,setChannelDescription] = useState('');
+  const [password,setPassword] = useState('');
   const [linesNotEnough1,setLinesNotEnough1] = useState(false);
   const [linesNotEnough2,setLinesNotEnough2] = useState(false);
   const [currentUser,setCurrentUser] = useRecoilState(currentUserState)
@@ -43,6 +48,7 @@ const Home = () => {
   const [groupSelected,setGroupSelected] = useRecoilState(groupSelectedState);
   const [channelAdmin,setChannelAdmin] = useRecoilState(channelAdminState);
   const [deleteConfirm,setDeleteConfirm] = useState(false);
+  const [passTabVisible,setPassTabVisible] = useState(false);
   const [privacy,setPrivacy] = useState(false);
   const [userName,setUserName] = useState('');
   const [path7,setPath7] = useState('')
@@ -239,7 +245,7 @@ const Home = () => {
           users.push(currentUser);
           setChannelName('');setChannelDescription('');
           const {data} = await axios.post(createChannelRoutes,{
-            name,description,admin,adminId,adminOnly,users,privacy
+            name,description,admin,adminId,password,adminOnly,users,privacy
           })
           if(data.status === true){
             setCurrentChannel(data.group);
@@ -256,6 +262,8 @@ const Home = () => {
           setChannelAdmin(true);
           socket.emit('refetchChannels');
           handleClose();
+          setPassTabVisible(false);
+          setPassword('');
       }else{
         setLinesNotEnough2(true);
         setTimeout(function() {setLinesNotEnough2(false)}, 2000);
@@ -333,6 +341,45 @@ const Home = () => {
       }
     }
 
+    useEffect(()=>{
+      if(!passTabVisible){
+        setPassword('')
+      }
+    },[passTabVisible])
+
+
+const Android12Switch = styled(Switch)(({ theme }) => ({
+    padding: 8,
+    '& .MuiSwitch-track': {
+      borderRadius: 22 / 2,
+      '&:before, &:after': {
+        content: '""',
+        position: 'absolute',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        width: 16,
+        height: 16,
+      },
+      '&:before': {
+        backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+          theme.palette.getContrastText(theme.palette.primary.main),
+        )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
+        left: 12,
+      },
+      '&:after': {
+        backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+          theme.palette.getContrastText(theme.palette.primary.main),
+        )}" d="M19,13H5V11H19V13Z" /></svg>')`,
+        right: 12,
+      },
+    },
+    '& .MuiSwitch-thumb': {
+      boxShadow: 'none',
+      width: 16,
+      height: 16,
+      margin: 2,
+    },
+  }));
 
   return (
     <div className="flex min-h-screen ">
@@ -484,10 +531,38 @@ const Home = () => {
             placeholder="Channel Description"
             />
           </div>
-          <div className="flex items-center ml-5 mb-7 gap-5" >
-            <input type="checkbox" className="h-4 w-4 outline-none border-none" onChange={()=>setPrivacy(!privacy)}/>
-            <h1 className="text-gray-300 text-lg font-semibold">Private ({privacy ? "Private Channel":"Public Channel"})</h1>
+          <div className="flex items-center ml-2 mb-5 gap-1" >
+            <FormControlLabel
+                control={<Android12Switch defaultChecked />}
+                checked={privacy}
+                onChange={()=>setPrivacy(!privacy)}
+            />
+            <h1 className="text-gray-300 text-lg font-semibold">Private Channel({privacy ? "Private":"Public"})</h1>
           </div>
+          <div className="flex items-center ml-2 mb-5 gap-1" >
+            <FormControlLabel
+                control={<Android12Switch defaultChecked />}
+                checked={passTabVisible}
+                onChange={()=>setPassTabVisible(!passTabVisible)}
+            />
+            <h1 className="text-gray-300 text-lg font-semibold">Password ({password ? "Locked" : "No Password"})</h1>
+          </div>
+          {
+            passTabVisible ? 
+            <div>
+            <div className="flex my-5 flex-col w-[330px] md:w-[600px] gap-3">
+              <input type="text"
+              value={password}
+              onChange={(e)=>setPassword(e.target.value)} 
+              className={`w-full border border-gray-800 rounded-xl bg-gray-600/40 p-5 outline-none text-gray-200`}
+              placeholder="Password"
+              />
+              <h1 className="text-sm text-red-500" >*Password can't be changed after creating the room</h1>
+            </div>
+            </div>
+            : 
+            ""
+          }
           <div className="flex justify-end gap-5" >
             <button 
             onClick={()=>{

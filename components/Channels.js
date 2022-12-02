@@ -3,7 +3,7 @@ import {BiSearchAlt2} from 'react-icons/bi';
 import axios from 'axios'
 import {useRecoilState} from 'recoil'
 import {currentUserState,revealMenuState,allChannelsState,searchChannelsState,channelAdminState,
-	currentChannelState,groupSelectedState,userMessageState,loaderState,loaderState2,
+	passTabOpenState,currentChannelState,groupSelectedState,userMessageState,loaderState,loaderState2,
 	loaderState3,loaderState4,loaderState5,loaderState6} from '../atoms/userAtom'
 import {CgChevronUp,CgChevronDown} from 'react-icons/cg'
 import {BsChevronLeft} from 'react-icons/bs'
@@ -21,7 +21,7 @@ import {toast,ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch, { SwitchProps } from '@mui/material/Switch';
+import Switch from '@mui/material/Switch';
 import { styled } from '@mui/material/styles';
 
 
@@ -37,6 +37,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 	const [groupSelected,setGroupSelected] = useRecoilState(groupSelectedState);
 	const [searchChannels,setSearchChannels] = useRecoilState(searchChannelsState);
 	const [channelAdmin,setChannelAdmin] = useRecoilState(channelAdminState);
+	const [passTabOpen,setPassTabOpen] = useRecoilState(passTabOpenState);
 	const [message,setMessage] = useState(userMessageState);
 	const [loader1,setLoader1] = useRecoilState(loaderState);
 	const [loader2,setLoader2] = useRecoilState(loaderState2);
@@ -89,6 +90,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		// console.log(data)
 	}
 
+	useEffect(()=>{setPassTabOpen(false)},[searchText])
 
 	const handleReveal = () =>{
 		setRevealState(!revealState)
@@ -240,14 +242,22 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 							<h1 className="text-xl font-semibold text-white truncate" >{currentChannel.name} </h1>
 							{
 								currentChannel.adminId === currentUser._id &&
-								<div className="flex items-center" >
-									<FormControlLabel
-								        control={<Android12Switch defaultChecked />}
-								        checked={currentChannel.adminOnly}
-								        onChange={handleAdminOnlyChange}
-								    />
-								    <p className="text-md font-semibold text-white">Admin Only Chat</p>
-							    </div>
+								<div>
+									<div className="flex items-center" >
+										<FormControlLabel
+									        control={<Android12Switch defaultChecked />}
+									        checked={currentChannel.adminOnly}
+									        onChange={handleAdminOnlyChange}
+									    />
+									    <p className="text-md font-semibold text-white">Admin Only Chat</p>
+								    </div>
+								    {
+								    	currentChannel.password ? 
+								    	<h1 className="text-gray-500 text-md mt-2">Password :- {currentChannel.password}</h1>
+								    	:
+								    	""
+								    }
+								</div>
 							}
 							<div className="flex gap-2 w-full" >
 								<h1 className="text-md text-gray-400/70 truncate">Created By :-</h1>

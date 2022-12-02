@@ -1,5 +1,6 @@
 export const host = "https://chat-siris-v2-server.vercel.app";
 
+
 export const registerRoutes = `${host}/api/auth/register`;
 export const loginRoutes = `${host}/api/auth/login`;
 export const createChannelRoutes = `${host}/api/auth/createChannel`;
