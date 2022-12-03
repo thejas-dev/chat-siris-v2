@@ -14,19 +14,19 @@ export default function check() {
 
 		useEffect(()=>{
 			const para = document.getElementById('para')
-			para.addEventListener('touchmove',(event)=>{
+			para.addEventListener('touchend',(event)=>{
 				console.log(event)
 	            var X = event.touches[0].clientX;
 	           
 	           
 	            document.getElementById(
-	              "test").innerHTML = X ;
+	              "test2").innerHTML = X ;
 			})
 
 			para.addEventListener('touchstart',(event)=>{
 				console.log(event)
 				var X = event.touches[0].clientX;
-				document.getElementById('test2').innerHTML = X
+				document.getElementById('test').innerHTML = X
 			})
 		},[])
 
