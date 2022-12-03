@@ -2,7 +2,7 @@ import {useState,useEffect} from 'react'
 import {BiSearchAlt2} from 'react-icons/bi';
 import axios from 'axios'
 import {useRecoilState} from 'recoil'
-import {currentUserState,revealMenuState,allChannelsState,searchChannelsState,channelAdminState,
+import {currentUserState,revealMenuState,allChannelsState,searchChannelsState,channelAdminState,recordingState,
 	passTabOpenState,currentChannelState,groupSelectedState,userMessageState,loaderState,loaderState2,
 	loaderState3,loaderState4,loaderState5,loaderState6} from '../atoms/userAtom'
 import {CgChevronUp,CgChevronDown} from 'react-icons/cg'
@@ -38,6 +38,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 	const [searchChannels,setSearchChannels] = useRecoilState(searchChannelsState);
 	const [channelAdmin,setChannelAdmin] = useRecoilState(channelAdminState);
 	const [passTabOpen,setPassTabOpen] = useRecoilState(passTabOpenState);
+	const [isRecording,setIsRecording] = useRecoilState(recordingState)
 	const [message,setMessage] = useState(userMessageState);
 	const [loader1,setLoader1] = useRecoilState(loaderState);
 	const [loader2,setLoader2] = useRecoilState(loaderState2);
@@ -98,7 +99,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 	}
 
 	const removeUserFromChannel = async() => {
-			if(!loader1 && !loader2 && !loader3 && !loader4 && !loader5 && !loader6){
+			if(!loader1 && !loader2 && !loader3 && !loader4 && !loader5 && !loader6 && !isRecording){
 				setMessage('');
 				const name = currentChannel.name;
 				const data0 = await axios.post(fetchUserRoom,{

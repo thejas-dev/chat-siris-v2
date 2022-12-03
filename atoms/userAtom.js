@@ -94,3 +94,8 @@ export const entryPassState = atom({
 	key:"entryPassState",
 	default:''
 })
+
+export const recordingState = atom({
+	key:"recordingState",
+	default:false
+})

@@ -2,7 +2,7 @@ import {useRecoilState} from 'recoil'
 import {useState,useEffect,useRef} from 'react'
 import ImageKit from "imagekit"
 import {currentUserState,groupSelectedState,revealMenuState,channelAdminState,channelAdminOnlyState,
-	currentChannelState,messageState,userMessageState,loaderState,loaderState2,
+	currentChannelState,messageState,recordingState,userMessageState,loaderState,loaderState2,
 	loaderState3,loaderState4,loaderState5,loaderState6} from '../atoms/userAtom'
 import robot from '../assets/robot.gif';
 import {IoMdMenu} from 'react-icons/io'
@@ -47,7 +47,7 @@ export default function Messages({session}) {
 	const [path3,setPath3] = useState('');
 	const [path2,setPath2] = useState('');
 	const [path1,setPath1] = useState('');
-	const [isRecording,setIsRecording] = useState(false)
+	const [isRecording,setIsRecording] = useRecoilState(recordingState)
 	const [url6,setUrl6] = useState('')
 	const [url5,setUrl5] = useState('')
 	const [url4,setUrl4] = useState('')
