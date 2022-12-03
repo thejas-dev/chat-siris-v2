@@ -72,8 +72,8 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 			fetchRoom(currentUser.inChannel)
 		}
 		const channelSide = document.getElementById('channels')
-		const delta = 70;
-		const delta2 = 140;
+		const delta = 100;
+		const delta2 = 160;
 		let startX;
 		let touchst;
 		channelSide.addEventListener('mousedown', function (event) {
