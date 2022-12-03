@@ -16,7 +16,7 @@ export default function check() {
 
 		useEffect(()=>{
 			const para = document.getElementById('para');
-			const delta2 = 50;
+			const delta2 = 120;
 			let touchst ;
 			para.addEventListener('touchmove',(event)=>{
 				console.log(event)
@@ -32,6 +32,7 @@ export default function check() {
 			para.addEventListener('touchstart',(event)=>{
 				console.log(event)
 				touchst = event.touches[0].clientX;
+				setReveal(false);
 				document.getElementById('test2').innerHTML = touchst;
 			})
 		},[])
