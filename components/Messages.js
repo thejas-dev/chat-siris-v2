@@ -189,7 +189,7 @@ export default function Messages({session}) {
 		
 		messagecom.addEventListener('touchmove',(event)=>{
             var X = event.touches[0].clientX;
-			if(X-touchst>100){
+			if(X-touchst>110){
 				setRevealMenu(true);
 			}
 		})
