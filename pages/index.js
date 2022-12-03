@@ -433,7 +433,7 @@ const Android12Switch = styled(Switch)(({ theme }) => ({
               <div className="flex flex-col items-center gap-2" >
                 {revealEdit && 
                   <div className="p-2 border-2 border-sky-500/70 rounded-xl items-center flex shadow-lg shadow-yellow-500/50 mb-2">
-                  <input className="outline-none text-center md:w-30 w-20 border-none bg-transparent text-gray-300" 
+                  <input className="outline-none text-center md:w-30 w-20 text-sm md:text-md border-none bg-transparent text-gray-300" 
                   placeholder="Type Here" 
                   value={userName} onChange={(e)=>{
                     setUserName(e.target.value)
