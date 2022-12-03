@@ -26,7 +26,7 @@ export default function check() {
 		},[])
 
 return(
-<div>
+<div className="flex flex-col items-center justify-center" >
 <head>
     <title>touchmove Event in HTML</title>
  </head>
@@ -46,7 +46,7 @@ return(
  
     <br/>
  
-    <p id="test"></p>
+    <p id="test" className="text-md text-black" ></p>
  
  
  
