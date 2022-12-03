@@ -80,20 +80,21 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		});
 
 		channelSide.addEventListener('mouseup', function (event) {
-		  const diffX = event.pageX - startX
-
-		  if (diffX < delta) {
-		  	setRevealMenu(false);
-		  	startX = null;
-		  }else{
-		  	startX = null;
+		  // const diffX = event.pageX - startX
+		  if(startX-event.pageX > 100){
+		  	setRevealMenu(false)
 		  }
+		  // if (diffX < delta) {
+		  // 	setRevealMenu(false);
+		  // 	startX = null;
+		  // }else{
+		  // 	startX = null;
+		  // }
 		});
 
 
 		channelSide.addEventListener('touchstart',(event)=>{
 			touchst = event.touches[0].clientX;
-			document.getElementById('test2').innerHTML = touchst;
 		})
 		
 		channelSide.addEventListener('touchmove',(event)=>{
