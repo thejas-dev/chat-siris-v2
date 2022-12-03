@@ -72,7 +72,6 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 			fetchRoom(currentUser.inChannel)
 		}
 		const channelSide = document.getElementById('channels')
-		const delta = 100;
 		let startX;
 		let touchst;
 		channelSide.addEventListener('mousedown', function (event) {
@@ -81,15 +80,9 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 
 		channelSide.addEventListener('mouseup', function (event) {
 		  // const diffX = event.pageX - startX
-		  if(startX-event.pageX > 100){
+		  if(startX-event.pageX > 90){
 		  	setRevealMenu(false)
 		  }
-		  // if (diffX < delta) {
-		  // 	setRevealMenu(false);
-		  // 	startX = null;
-		  // }else{
-		  // 	startX = null;
-		  // }
 		});
 
 
