@@ -71,6 +71,24 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		if(currentUser?.inChannel){
 			fetchRoom(currentUser.inChannel)
 		}
+		const channelSide = document.getElementById('channels')
+		const delta = 4;
+		let startX;
+
+		element.addEventListener('mousedown', function (event) {
+		  startX = event.pageX;
+		});
+
+		element.addEventListener('mouseup', function (event) {
+		  const diffX = Math.abs(event.pageX - startX);
+
+		  if (diffX > delta) {
+		  	setRevealMenu(false);
+		  	startX = null;
+		  }else{
+		  	startX = null;
+		  }
+		});
 	},[])
 
 	const fetchRoom = async(name) => {
@@ -214,7 +232,9 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 
 	return(
 
-		<div className={`overflow-hidden md:w-[22%] w-0 ${revealMenu ? "w-[80%]  transform transition-width duration-500 ease-in-out" : "w-[0%] transform transition-width duration-500 ease-in-out" } h-screen relative bg-[#120F13] relative`}>
+		<div 
+		id="channels"
+		className={`overflow-hidden md:w-[22%] w-0 ${revealMenu ? "w-[80%]  transform transition-width duration-500 ease-in-out" : "w-[0%] transform transition-width duration-500 ease-in-out" } h-screen relative bg-[#120F13] relative`}>
 			<header className="w-full flex  p-4 shadow-md shadow-black/50 justify-between items-center" >	
 				{
 					currentChannel ? 
