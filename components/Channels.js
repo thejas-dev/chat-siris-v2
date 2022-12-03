@@ -72,7 +72,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 			fetchRoom(currentUser.inChannel)
 		}
 		const channelSide = document.getElementById('channels')
-		const delta = 40;
+		const delta = 70;
 		let startX;
 
 		channelSide.addEventListener('mousedown', function (event) {
@@ -101,7 +101,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		  const diffX = event.pageX - startX
 		  console.log("mouseup")
 
-		  if (diffX > delta) {
+		  if (diffX < delta) {
 		  	setRevealMenu(false);
 		  	startX = null;
 		  }else{
