@@ -250,7 +250,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 					<div className="flex md:gap-5 gap-3 w-full" >	
 						<BsChevronLeft 
 						onClick={()=>{if(groupSelected){removeUserFromChannel()}}}
-						className="h-8 w-8 text-gray-800/70  hover:bg-gray-800/40 rounded-lg 
+						className="h-8 w-8 text-gray-500/70  hover:bg-gray-800/40 rounded-lg 
 						transition duration-300 ease-out p-[3px]" />
 						<p className="font-semibold text-white text-xl">All Channels</p>
 					</div>
@@ -361,8 +361,8 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 					duration-300 ease-in-out active:scale-90 text-white mr-3`} />									
 				</div>
 			</footer>
-			<div className={`absolute ${revealState ? "scale-100 transition-bottom duration-500 ease-in-out opacity-100" : "scale-50 transition-bottom duration-500 ease-in-out opacity-0 "} 
-			 transition duration-500 right-5 ease-in-out bottom-20 z-0 p-2 flex flex-col border 
+			<div className={`absolute ${revealState ? "scale-100 bottom-20 transition-bottom duration-500 ease-in-out opacity-100" : "scale-50 transition-bottom -bottom-20 duration-500 ease-in-out opacity-0 "} 
+			 transition duration-500 right-5 ease-in-out  z-50 p-2 flex flex-col border 
 			bg-gray-800 border-gray-600 rounded-xl w-30`} >
 				<div 
 				onClick={handleToggle3}
