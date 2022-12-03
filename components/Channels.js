@@ -330,7 +330,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 					<>
 						<div className="w-full p-3 flex bg-gray-600/50 rounded-lg" >
 							<BiSearchAlt2 className="h-7 w-7 text-white text-gray-300" />
-							<input type="text" className="outline-none ml-2 w-full text-gray-400 bg-transparent "
+							<input type="text" className="outline-none ml-2 w-full text-gray-400 z-50 bg-transparent "
 							value={searchText}
 							placeholder="Search Private Channels"
 							onChange={(e)=>{setSearchText(e.target.value)}}
