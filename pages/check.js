@@ -18,10 +18,9 @@ export default function check() {
 				console.log(event)
 	            var X = event.touches[0].clientX;
 	           
-	            var Y = event.touches[0].clientY;
 	           
 	            document.getElementById(
-	              "test").innerHTML = X + ", " + Y;
+	              "test").innerHTML = X ;
 			})
 		},[])
 
