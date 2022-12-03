@@ -1,4 +1,4 @@
-
+import {useEffect} from 'react'
 
 export default function check() {
 	// body...
@@ -12,6 +12,17 @@ export default function check() {
               "test").innerHTML = X + ", " + Y;
         }
 
+		useEffect(()=>{
+			const para = document.getElementById('para')
+			para.addEventListener('mousemove',(event)=>{
+	            var X = event.touches[0].clientX;
+	           
+	            var Y = event.touches[0].clientY;
+	           
+	            document.getElementById(
+	              "test").innerHTML = X + ", " + Y;
+			})
+		},[])
 
 return(
 <div>
@@ -25,7 +36,7 @@ return(
     <h2 className="font-bold" >touchmove Event</h2>
     <br/>
  
-    <p ontouchmove={(event)=>move(event)}>
+    <p id="para">
       Touch somewhere in the paragraph and then
       move the finger to trigger a function that
       will display the x and y coordinates of the touch.
