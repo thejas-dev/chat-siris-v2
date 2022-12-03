@@ -442,20 +442,20 @@ const Android12Switch = styled(Switch)(({ theme }) => ({
                 </div>
                 }
                 <h1 className="text-md text-gray-500">Name</h1>
-                <h1 className="text-xl text-gray-400 font-semibold flex gap-2">{currentUser?.username}<MdEdit 
+                <h1 className="md:text-xl text-sm text-gray-400 font-semibold flex gap-2">{currentUser?.username}<MdEdit 
                 onClick={()=>setRevealEdit(!revealEdit)}
                 className={`h-6 w-6 ${currentUser?.inChannel ? "hidden" : ""} hover:scale-110 hover:text-gray-300 transition
                 transform duration-300 ease-in-out active:scale-90 cursor-pointer text-gray-500`}/></h1>
               </div>
               <div className="flex flex-col items-center gap-2" >
                 <h1 className="text-md text-gray-500">Admin in</h1>
-                <h1 className="text-xl text-gray-400 font-semibold">{currentUser?.admin ? currentUser.admin : "~"}</h1>
+                <h1 className="md:text-xl text-sm text-gray-400 font-semibold">{currentUser?.admin ? currentUser.admin : "~"}</h1>
               </div>
             </div>
             <div className="flex items-center flex-col gap-10">
               <div className="flex flex-col items-center gap-2" >
                 <h1 className="text-md text-gray-500">Created At</h1>
-                <h1 className="text-xl text-gray-400 font-semibold">{
+                <h1 className="md:text-xl text-sm text-gray-400 font-semibold">{
                   currentUser ? 
                   <>{currentUser?.createdAt?.split('T')[0]} , {tConvert(currentUser?.createdAt)}</>
                     :
@@ -464,7 +464,7 @@ const Android12Switch = styled(Switch)(({ theme }) => ({
               </div>
               <div className="flex flex-col items-center gap-2" >
                 <h1 className="text-md text-gray-500">Currently inChannel</h1>
-                <h1 className="text-xl text-gray-400 font-semibold">{currentUser?.inChannel ? currentUser.inChannel : "~"}</h1>
+                <h1 className="md:text-xl text-sm text-gray-400 font-semibold">{currentUser?.inChannel ? currentUser.inChannel : "~"}</h1>
               </div>
             
             </div>
