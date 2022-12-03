@@ -13,20 +13,21 @@ export default function check() {
         }
 
 		useEffect(()=>{
-			const para = document.getElementById('para')
-			para.addEventListener('touchend',(event)=>{
+			const para = document.getElementById('para');
+			const delta2 = 50;
+			para.addEventListener('touchmove',(event)=>{
 				console.log(event)
 	            var X = event.touches[0].clientX;
 	           
 	           
 	            document.getElementById(
-	              "test2").innerHTML = X ;
+	              "test").innerHTML = X ;
 			})
 
 			para.addEventListener('touchstart',(event)=>{
 				console.log(event)
 				var X = event.touches[0].clientX;
-				document.getElementById('test').innerHTML = X
+				document.getElementById('test2').innerHTML = X
 			})
 		},[])
 
