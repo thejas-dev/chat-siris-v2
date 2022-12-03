@@ -442,10 +442,13 @@ const Android12Switch = styled(Switch)(({ theme }) => ({
                 </div>
                 }
                 <h1 className="text-md text-gray-500">Name</h1>
-                <h1 className="md:text-xl text-sm text-gray-400 font-semibold flex gap-2">{currentUser?.username}<MdEdit 
+                <div className="flex gap-2 items-center" >
+                <h1 className="md:text-xl text-sm text-gray-400 font-semibold flex gap-2">{currentUser?.username}</h1>
+                <MdEdit 
                 onClick={()=>setRevealEdit(!revealEdit)}
                 className={`md:h-6 h-4 md:w-6 w-4  ${currentUser?.inChannel ? "hidden" : ""} hover:scale-110 hover:text-gray-300 transition
-                transform duration-300 ease-in-out active:scale-90 cursor-pointer text-gray-500`}/></h1>
+                transform duration-300 ease-in-out active:scale-90 cursor-pointer text-gray-500`}/>
+                </div>
               </div>
               <div className="flex flex-col items-center gap-2" >
                 <h1 className="text-md text-gray-500">Admin in</h1>
