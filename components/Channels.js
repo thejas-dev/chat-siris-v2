@@ -271,7 +271,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 										<div 
 										key={user._id}
 										className="flex gap-4 items-center w-full cursor-pointer hover:bg-gray-900/70 transition
-										duration-300 ease-out p-2 rounded-xl" >
+										border-b border-gray-800/70 duration-300 ease-out p-2 rounded-xl" >
 											<img src={user.avatarImage} className="h-11 w-11 rounded-lg"/>
 											{
 												currentChannel.adminId === user._id ?
