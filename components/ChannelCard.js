@@ -2,7 +2,7 @@ import {BsChevronRight} from 'react-icons/bs';
 import {AiOutlineLock} from 'react-icons/ai';
 import {VscCloseAll} from 'react-icons/vsc';
 import {RiSendPlaneFill} from 'react-icons/ri';
-import {IoMdClose} from 'react-icons/io';
+import { } from 'react-icons/io';
 import {currentChannelState,groupSelectedState,revealMenuState,passTabOpenState,
 	currentUserState,channelAdminState} from '../atoms/userAtom'
 import {useRecoilState} from 'recoil';
@@ -64,7 +64,7 @@ export default function ChannelCard({channel}) {
 			addUserToChannelFun();
 			setRevealMenu(false);						
 		}else{
-			if(!passTabOpen){
+			if(!passTabOpen || !markChannel){
 				setPassTabOpen(true);
 				setMarkChannel(true);
 			}
@@ -128,7 +128,7 @@ export default function ChannelCard({channel}) {
 			<div>
 				{
 					channel.password ? 
-						passTabOpen ? 
+						passTabOpen && markChannel ? 
 							entryPass ? 
 								<RiSendPlaneFill 
 								onClick={passCheck}
