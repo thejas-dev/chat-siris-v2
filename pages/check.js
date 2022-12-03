@@ -23,7 +23,7 @@ return(
  
     <h1 className = "text-green-500" >GeeksforGeeks</h1>
     <h2 className="font-bold" >touchmove Event</h2>
-    <br>
+    <br/>
  
     <p ontouchmove={(event)=>move(event)}>
       Touch somewhere in the paragraph and then
@@ -32,7 +32,7 @@ return(
   </p>
  
  
-    <br>
+    <br/>
  
     <p id="test"></p>
  
