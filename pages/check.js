@@ -15,6 +15,7 @@ export default function check() {
 		useEffect(()=>{
 			const para = document.getElementById('para')
 			para.addEventListener('mousemove',(event)=>{
+				console.log(event)
 	            var X = event.touches[0].clientX;
 	           
 	            var Y = event.touches[0].clientY;
