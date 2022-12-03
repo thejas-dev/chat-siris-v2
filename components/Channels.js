@@ -80,22 +80,22 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		  console.log("mousedown")
 		});
 
-		channelSide.addEventListener('touchstart', function (event) {
-		  startX = event.pageX;
-		  console.log("mousedown")
-		});
+		// channelSide.addEventListener('touchstart', function (event) {
+		//   startX = event.pageX;
+		//   console.log("mousedown")
+		// });
 
-		channelSide.addEventListener('touchend', function (event) {
-		  const diffX = event.pageX - startX
-		  console.log("mouseup")
+		// channelSide.addEventListener('touchend', function (event) {
+		//   const diffX = event.pageX - startX
+		//   console.log("mouseup")
 
-		  if (diffX > delta) {
-		  	setRevealMenu(false);
-		  	startX = null;
-		  }else{
-		  	startX = null;
-		  }
-		});
+		//   if (diffX > delta) {
+		//   	setRevealMenu(false);
+		//   	startX = null;
+		//   }else{
+		//   	startX = null;
+		//   }
+		// });
 
 		channelSide.addEventListener('mouseup', function (event) {
 		  const diffX = event.pageX - startX
