@@ -75,12 +75,14 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		const delta = 4;
 		let startX;
 
-		element.addEventListener('mousedown', function (event) {
+		channelSide.addEventListener('mousedown', function (event) {
 		  startX = event.pageX;
+		  console.log("mousedown")
 		});
 
-		element.addEventListener('mouseup', function (event) {
+		channelSide.addEventListener('mouseup', function (event) {
 		  const diffX = Math.abs(event.pageX - startX);
+		  console.log("mouseup")
 
 		  if (diffX > delta) {
 		  	setRevealMenu(false);
