@@ -2,7 +2,7 @@ import {BsChevronRight} from 'react-icons/bs';
 import {AiOutlineLock} from 'react-icons/ai';
 import {VscCloseAll} from 'react-icons/vsc';
 import {RiSendPlaneFill} from 'react-icons/ri';
-import { } from 'react-icons/io';
+import {IoMdClose} from 'react-icons/io';
 import {currentChannelState,groupSelectedState,revealMenuState,passTabOpenState,
 	currentUserState,channelAdminState} from '../atoms/userAtom'
 import {useRecoilState} from 'recoil';
