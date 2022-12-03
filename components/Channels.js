@@ -98,7 +98,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		
 		channelSide.addEventListener('touchmove',(event)=>{
             var X = event.touches[0].clientX;
-			if(touchst-X >170){
+			if(touchst-X >100){
 				setRevealMenu(false);
 			}
 		})
