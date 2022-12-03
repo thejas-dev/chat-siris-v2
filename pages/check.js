@@ -14,7 +14,7 @@ export default function check() {
 
 		useEffect(()=>{
 			const para = document.getElementById('para')
-			para.addEventListener('mousemove',(event)=>{
+			para.addEventListener('touchmove',(event)=>{
 				console.log(event)
 	            var X = event.touches[0].clientX;
 	           
@@ -31,13 +31,13 @@ return(
     <title>touchmove Event in HTML</title>
  </head>
  
-<body>
+<body id="para" >
  
     <h1 className = "text-green-500" >GeeksforGeeks</h1>
     <h2 className="font-bold" >touchmove Event</h2>
     <br/>
  
-    <p id="para">
+    <p>
       Touch somewhere in the paragraph and then
       move the finger to trigger a function that
       will display the x and y coordinates of the touch.
