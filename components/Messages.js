@@ -180,6 +180,20 @@ export default function Messages({session}) {
 		scrollRef.current?.scrollIntoView({behaviour:"smooth"});
 	},[messages]);
 
+	useEffect(()=>{
+		const messagecom = document.getElementById('messagescomponent');
+		let touchst ;
+		messagecom.addEventListener('touchstart',(event)=>{
+			touchst = event.touches[0].clientX;
+		})
+		
+		messagecom.addEventListener('touchmove',(event)=>{
+            var X = event.touches[0].clientX;
+			if(X-touchst>210){
+				setRevealMenu(true);
+			}
+		})
+	},[])
 
 	const deleteMessage = async(id) => {
 		const {data} = await axios.post(deleteMessageRoute,{
@@ -593,6 +607,7 @@ export default function Messages({session}) {
 
 	return(
 		<div 
+		id="messagescomponent"
 		onClick={()=>{if(revealMenu){setRevealMenu(false)}}}
 		className={`md:w-[78%] overflow-hidden ${revealMenu ? "w-[20%]  transform transition-width duration-500 ease-in-out" : "w-[100%] transform transition-width duration-500 ease-in-out" } h-screen relative bg-[#333333]`} >
 			<header className="w-full flex p-[10px] shadow-md shadow-black/50 gap-4 z-50 items-center " >	

@@ -73,7 +73,6 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		}
 		const channelSide = document.getElementById('channels')
 		const delta = 100;
-		const delta2 = 160;
 		let startX;
 		let touchst;
 		channelSide.addEventListener('mousedown', function (event) {
@@ -99,7 +98,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		
 		channelSide.addEventListener('touchmove',(event)=>{
             var X = event.touches[0].clientX;
-			if(touchst-X >100){
+			if(touchst-X >170){
 				setRevealMenu(false);
 			}
 		})
