@@ -249,7 +249,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 					currentChannel ? 
 					<div className="flex md:gap-5 gap-3 w-full" >	
 						<BsChevronLeft 
-						onClick={()=>{if(groupSelected){removeUserFromChannel}}}
+						onClick={()=>{if(groupSelected){removeUserFromChannel()}}}
 						className="h-8 w-8 text-gray-800/70  hover:bg-gray-800/40 rounded-lg 
 						transition duration-300 ease-out p-[3px]" />
 						<p className="font-semibold text-white text-xl">All Channels</p>
