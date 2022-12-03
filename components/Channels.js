@@ -363,7 +363,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 			</footer>
 			<div className={`absolute ${revealState ? "scale-100  z-50 transition-bottom duration-500 ease-in-out opacity-100" : "scale-50 transition-bottom z-0 duration-500 ease-in-out opacity-0 "} 
 			 transition duration-500 right-5 bottom-20 ease-in-out p-2 flex flex-col border 
-			bg-gray-800 border-gray-600 rounded-xl w-30`} >
+			bg-gray-800/70 border-gray-600 rounded-xl w-30`} >
 				<div 
 				onClick={handleToggle3}
 				className="flex gap-2 hover:bg-gray-400/20 p-2  transition duration-200 ease-out cursor-pointer rounded-xl" >
