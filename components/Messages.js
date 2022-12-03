@@ -593,7 +593,6 @@ export default function Messages({session}) {
 
 	return(
 		<div className={`md:w-[78%] overflow-hidden ${revealMenu ? "w-[20%]  transform transition-width duration-500 ease-in-out" : "w-[100%] transform transition-width duration-500 ease-in-out" } h-screen relative bg-[#333333]`} >
-			<ToastContainer/>
 			<header className="w-full flex p-[10px] shadow-md shadow-black/50 gap-4 z-50 items-center " >	
 				{
 					revealMenu ? 

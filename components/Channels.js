@@ -17,7 +17,7 @@ import {getAllChannelsRoutes,fetchUserRoom,addChannelToUser,addUserToChannel,
 import ChannelCard from './ChannelCard';
 import {signOut} from 'next-auth/react';
 import {socket} from '../service/socket';
-import {toast,ToastContainer} from 'react-toastify';
+import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
