@@ -136,6 +136,9 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 			if(!loader1 && !loader2 && !loader3 && !loader4 && !loader5 && !loader6 && !isRecording){
 				setMessage('');
 				const name = currentChannel.name;
+				fetch();
+				setChannelAdmin(false);
+				setGroupSelected(false);
 				const data0 = await axios.post(fetchUserRoom,{
 					name
 				})
@@ -159,10 +162,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 				})
 				// console.log(data.obj);
 				setCurrentUser(data.obj);
-				setCurrentChannel('');
-				fetch();
-				setChannelAdmin(false);
-				setGroupSelected(false);				
+				setCurrentChannel('');				
 			}else{
 				toast('Please Wait',toastOptions)
 			}
