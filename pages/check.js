@@ -22,6 +22,12 @@ export default function check() {
 	            document.getElementById(
 	              "test").innerHTML = X ;
 			})
+
+			para.addEventListener('touchstart',(event)=>{
+				console.log(event)
+				var X = event.touches[0].clientX;
+				document.getElementById('test2').innerHTML = X
+			})
 		},[])
 
 return(
@@ -46,6 +52,7 @@ return(
     <br/>
  
     <p id="test" className="text-md text-black" ></p>
+    <p id="test2" className="text-md text-black mt-5" ></p>
  
  
  
