@@ -16,7 +16,7 @@ export default function check() {
 
 		useEffect(()=>{
 			const para = document.getElementById('para');
-			const delta2 = 120;
+			const delta2 = 140;
 			let touchst ;
 			para.addEventListener('touchmove',(event)=>{
 				console.log(event)

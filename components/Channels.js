@@ -73,33 +73,15 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		}
 		const channelSide = document.getElementById('channels')
 		const delta = 70;
+		const delta2 = 140;
 		let startX;
-
+		let touchst;
 		channelSide.addEventListener('mousedown', function (event) {
 		  startX = event.pageX;
-		  console.log("mousedown")
 		});
-
-		// channelSide.addEventListener('touchstart', function (event) {
-		//   startX = event.pageX;
-		//   console.log("mousedown")
-		// });
-
-		// channelSide.addEventListener('touchend', function (event) {
-		//   const diffX = event.pageX - startX
-		//   console.log("mouseup")
-
-		//   if (diffX > delta) {
-		//   	setRevealMenu(false);
-		//   	startX = null;
-		//   }else{
-		//   	startX = null;
-		//   }
-		// });
 
 		channelSide.addEventListener('mouseup', function (event) {
 		  const diffX = event.pageX - startX
-		  console.log("mouseup")
 
 		  if (diffX < delta) {
 		  	setRevealMenu(false);
@@ -108,6 +90,21 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 		  	startX = null;
 		  }
 		});
+
+
+		channelSide.addEventListener('touchstart',(event)=>{
+			touchst = event.touches[0].clientX;
+			document.getElementById('test2').innerHTML = touchst;
+		})
+		
+		channelSide.addEventListener('touchmove',(event)=>{
+            var X = event.touches[0].clientX;
+			if(touchst-X >100){
+				setRevealMenu(false);
+			}
+		})
+
+
 	},[])
 
 	const fetchRoom = async(name) => {
