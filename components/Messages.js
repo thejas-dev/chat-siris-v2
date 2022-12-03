@@ -99,6 +99,7 @@ export default function Messages({session}) {
 			const {data} = await axios.post(sendMessageRoutes,{
 				group,message,byUserName,byUserImage
 			})
+			setMessages(current => [...current,data?.data]);
 			const dataRef = {
 				group:group,
 				data:data
@@ -115,6 +116,7 @@ export default function Messages({session}) {
 		const {data} = await axios.post(sendMessageRoutes,{
 			group,message,byUserName,byUserImage
 		})
+		setMessages(current => [...current,data?.data]);
 		setUrl2('')
 		const dataRef = {
 			group,
@@ -132,7 +134,9 @@ export default function Messages({session}) {
 
 	useEffect(()=>{
 			socket.on('msg-recieve',(data)=>{
-				setMessages(current => [...current,data?.data]);
+				if(data.data.byUserName !== currentUser.username){
+					setMessages(current => [...current,data?.data]);
+				}
 			});
 			socket.on('fetchMessages',async(group)=>{
 				const {data} = await axios.post(getMessageRoutes,{

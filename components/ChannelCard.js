@@ -94,7 +94,9 @@ export default function ChannelCard({channel}) {
 	  }
 
 	  useEffect(()=>{
-	  	console.log(passTabOpen);
+	  	if(!passTabOpen){
+	  		setMarkChannel(false);
+	  	}
 	  },[passTabOpen])
 
 	return(
