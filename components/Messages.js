@@ -1,6 +1,5 @@
 import {useRecoilState} from 'recoil'
 import {useState,useEffect,useRef} from 'react'
-import ImageKit from "imagekit"
 import {currentUserState,groupSelectedState,revealMenuState,channelAdminState,channelAdminOnlyState,
 	currentChannelState,messageState,recordingState,userMessageState,loaderState,loaderState2,
 	loaderState3,loaderState4,loaderState5,loaderState6} from '../atoms/userAtom'
@@ -14,9 +13,10 @@ import {FiMusic} from 'react-icons/fi';
 import {RiSendPlaneFill} from 'react-icons/ri';
 import {ImFileZip} from 'react-icons/im'
 import {SiJson} from 'react-icons/si';
-import {sendMessageRoutes,getMessageRoutes,deleteMessageRoute,host} from '../utils/ApiRoutes';
-import {socket} from '../service/socket';
-import axios from 'axios'
+import {sendMessageRoutes,getMessageRoutes,deleteMessageRoute} from '../utils/ApiRoutes';
+import {uploadMediaFromDataUrl} from '../utils/mediaUpload';
+import {getSocket, setSocketUser, joinChannelRoom} from '../service/socket';
+import axiosClient from '../utils/axiosClient'
 import {ImAttachment} from 'react-icons/im'
 import MessageCard from './MessageCard'
 import MicRecorder from 'mic-recorder-to-mp3';
@@ -32,6 +32,8 @@ export default function Messages({session}) {
 	const scrollRef = useRef();
 	const [userMessage,setUserMessage] = useRecoilState(userMessageState);
 	const [messages,setMessages] = useRecoilState(messageState);
+	const [pagination,setPagination] = useState({ hasMore: false, nextCursor: null });
+	const [loadingOlder,setLoadingOlder] = useState(false);
 	const [channelAdmin,setChannelAdmin] = useRecoilState(channelAdminState);
 	const [channelAdminOnly,setChannelAdminOnly] = useRecoilState(channelAdminOnlyState)
 	const [revealMedia,setRevealMedia] = useState(false)
@@ -59,11 +61,22 @@ export default function Messages({session}) {
 	const [fileName,setFileName] = useState('');
 	const [uploading,setUploading] = useState(false);
 	const [isBlocked,setIsBlocked] = useState(true);
-	const imagekit = new ImageKit({
-	    publicKey : process.env.NEXT_PUBLIC_IMAGEKIT_ID,
-	    privateKey : process.env.NEXT_PUBLIC_IMAGEKIT_PRIVATE,
-	    urlEndpoint : process.env.NEXT_PUBLIC_IMAGEKIT_ENDPOINT
-	});
+	const mergeOlderMessages = (prev, older) => {
+		const seen = new Set(older.map((m) => m._id));
+		const filtered = prev.filter((m) => !seen.has(m._id));
+		return [...older, ...filtered];
+	};
+
+	const appendMessageIfNew = (prev, msg) => {
+		if (!msg?._id) {
+			return prev;
+		}
+		const id = String(msg._id);
+		if (prev.some((m) => String(m._id) === id)) {
+			return prev;
+		}
+		return [...prev, msg];
+	};
 
 	const pathCheck = (path) =>{
 		if(path){
@@ -96,15 +109,10 @@ export default function Messages({session}) {
 			let byUserImage = currentUser.avatarImage;
 			const message = userMessage
 			setUserMessage('');
-			const {data} = await axios.post(sendMessageRoutes,{
+			const {data} = await axiosClient.post(sendMessageRoutes,{
 				group,message,byUserName,byUserImage
 			})
-			setMessages(current => [...current,data?.data]);
-			const dataRef = {
-				group:group,
-				data:data
-			}
-			socket.emit('add-msg',dataRef);
+			setMessages(current => appendMessageIfNew(current, data?.data));
 		}
 	} 
 
@@ -113,46 +121,94 @@ export default function Messages({session}) {
 		let byUserName = currentUser.username;
 		let byUserImage = currentUser.avatarImage;
 		const message = msg;
-		const {data} = await axios.post(sendMessageRoutes,{
+		const {data} = await axiosClient.post(sendMessageRoutes,{
 			group,message,byUserName,byUserImage
 		})
-		setMessages(current => [...current,data?.data]);
+		setMessages(current => appendMessageIfNew(current, data?.data));
 		setUrl2('')
-		const dataRef = {
-			group,
-			data
-		}
-		socket.emit('add-msg',dataRef);
 	}
 
+	const loadInitialMessages = async(group) => {
+		console.log("loadInitialMessages", group);
+		const { data } = await axiosClient.post(getMessageRoutes, {
+			group,
+			limit: 50,
+		});
+		setMessages(data.data ?? []);
+		setPagination(data.pagination ?? { hasMore: false, nextCursor: null });
+	};
 
-	useEffect(()=>{
-		if(currentUser){
-			socket.emit('add-user',currentUser._id);
+	const loadOlderMessages = async(group) => {
+		if (!pagination.hasMore || !pagination.nextCursor || loadingOlder) {
+			return;
 		}
-	},[currentUser])
-
-	useEffect(()=>{
-			socket.on('msg-recieve',(data)=>{
-				if(data.data.byUserName !== currentUser.username){
-					setMessages(current => [...current,data?.data]);
-				}
+		setLoadingOlder(true);
+		try {
+			const { data } = await axiosClient.post(getMessageRoutes, {
+				group,
+				before: pagination.nextCursor,
 			});
-			socket.on('fetchMessages',async(group)=>{
-				const {data} = await axios.post(getMessageRoutes,{
-					group
-				});
-				setMessages(data.data)
-			})
-			return ()=>{
-				socket.off('msg-recieve');
-				socket.off('fetchMessages');
+			setMessages((prev) => mergeOlderMessages(prev, data.data ?? []));
+			setPagination(data.pagination ?? { hasMore: false, nextCursor: null });
+		} finally {
+			setLoadingOlder(false);
+		}
+	};
+
+	const getChat = async() => {
+		await loadInitialMessages(currentChannel.name);
+	};
+
+	const handleMessagesScroll = (event) => {
+		if (event.target.scrollTop <= 40 && pagination.hasMore) {
+			loadOlderMessages(currentChannel.name);
+		}
+	};
+
+	useEffect(()=>{
+		if(currentUser?._id){
+			setSocketUser(currentUser._id);
+		}
+	},[currentUser?._id])
+
+	useEffect(()=>{
+		if(currentChannel?.name && Array.isArray(currentChannel.users)){
+			joinChannelRoom(currentChannel);
+		}
+	},[currentChannel?.name, currentChannel?._id, currentChannel?.users?.length])
+
+	useEffect(()=>{
+			const client = getSocket();
+			if (!client) {
+				return undefined;
 			}
-	},[])
+			const onMsgReceive = (data) => {
+				const msg = data?.data;
+				if (!msg || msg.byUserName === currentUser?.username) {
+					return;
+				}
+				setMessages((current) => appendMessageIfNew(current, msg));
+			};
+			const onFetchMessages = async (groupName) => {
+				const channelName = typeof groupName === 'string'
+					? groupName
+					: groupName?.group ?? currentChannel?.name;
+				if(channelName){
+					await loadInitialMessages(channelName);
+				}
+			};
+			client.on('msg-recieve', onMsgReceive);
+			client.on('fetchMessages', onFetchMessages);
+			return ()=>{
+				client.off('msg-recieve', onMsgReceive);
+				client.off('fetchMessages', onFetchMessages);
+			}
+	},[currentUser?.username, currentChannel?.name])
 
 
 	useEffect(()=>{
-		if(currentChannel !== {}){
+		if(currentChannel !== null && currentChannel !== undefined && currentChannel !== ""){
+			console.log("currentChannel", currentChannel);
 			getChat();
 			if(currentChannel?.adminOnly){
 				setChannelAdminOnly(true);
@@ -165,16 +221,6 @@ export default function Messages({session}) {
 			}
 		}
 	},[currentChannel])
-
-
-	const getChat = async() =>{
-		let group = currentChannel.name;
-		const {data} = await axios.post(getMessageRoutes,{
-			group
-		});
-		// console.log(data)
-		setMessages(data.data)
-	};
 
 	useEffect(()=>{
 		scrollRef.current?.scrollIntoView({behaviour:"smooth"});
@@ -196,14 +242,10 @@ export default function Messages({session}) {
 	},[])
 
 	const deleteMessage = async(id) => {
-		const {data} = await axios.post(deleteMessageRoute,{
-			id
-		})
-		let group = currentChannel?.name;
-		const dataRef = {
-			group:group,
+		await axiosClient.post(deleteMessageRoute, { id });
+		if (currentChannel?.name) {
+			await loadInitialMessages(currentChannel.name);
 		}
-		socket.emit('refetchMessages',dataRef)
 	}
 
 	const url1Setter = () =>{
@@ -325,103 +367,71 @@ export default function Messages({session}) {
 	useEffect(()=>{
 		if(url1){
 			setLoader2(true)
-			const uploadImage = (url1) =>{
-				if(audioPathCheck(url1)){
-					imagekit.upload({
-				    file : url1, //required
-				    folder:"Audios",
-				    fileName : "thejashari",   //required
-				    extensions: [
-				        {
-				            name: "google-auto-tagging",
-				            maxTags: 5,
-				            minConfidence: 95
-				        }
-				    ]
-					}).then(response => {
-					   	sendImage(response.url);
-					   	setUploading(false)
-					   	setUrl1('')
-					    setLoader2(false)
-					}).catch(error => {
-					    console.log(error);
-					});
-
+			const uploadAudio = async (dataUrl) => {
+				if(audioPathCheck(dataUrl)){
+					try {
+						const cdnUrl = await uploadMediaFromDataUrl(dataUrl, 'Audios', 'thejashari');
+						await sendImage(cdnUrl);
+						setUploading(false);
+						setUrl1('');
+					} catch (error) {
+						console.log(error);
+						toast('Upload failed', toastOptions);
+					}
 				}else{
 					toast("Please Select an Audio File",toastOptions)
 					setUrl1('')
-					setLoader2(false)
 				}
+				setLoader2(false)
 			}
-			uploadImage(url1);
+			uploadAudio(url1);
 		}
 	},[url1])
 
 
 	useEffect(()=>{
 	if(url2){
-		// 
 			setLoader1(true);
-			const uploadImage = (url2) =>{
-				if(pathCheck(url2)){
-					imagekit.upload({
-				    file : url2, //required
-				    fileName : "thejashari",   //required
-				    extensions: [
-				        {
-				            name: "google-auto-tagging",
-				            maxTags: 5,
-				            minConfidence: 95
-				        }
-				    ]
-					}).then(response => {
-						setLoader1(false)
-					    // uploadBackground(response.url)
-					    setUrl2('');
-					    sendImage(response.url);
-					}).catch(error => {
-					    console.log(error);
-					});
+			const uploadImageFile = async (dataUrl) => {
+				if(pathCheck(dataUrl)){
+					try {
+						const cdnUrl = await uploadMediaFromDataUrl(dataUrl, 'Images', 'thejashari');
+						setUrl2('');
+						await sendImage(cdnUrl);
+					} catch (error) {
+						console.log(error);
+						toast('Upload failed', toastOptions);
+					}
 				}else{
 					toast("Not an Image Format",toastOptions)
 					setUrl2('')
-					setLoader1(false);
 				}
+				setLoader1(false);
 			}
-			uploadImage(url2);
+			uploadImageFile(url2);
 		}
 	},[url2])
 
 	useEffect(()=>{
 	if(url3){
 			setLoader3(true);
-			const uploadImage = (url3) =>{
-				if(videoPathCheck(url3)){
-					imagekit.upload({
-				    file : url3,
-				    folder:"Videos", //required
-				    fileName : "thejashari",   //required
-				    extensions: [
-				        {
-				            name: "google-auto-tagging",
-				            maxTags: 5,
-				            minConfidence: 95
-				        }
-				    ]
-					}).then(response => {
-					    sendImage(response.url);
-					    setUrl3('')
-					    setLoader3(false)
-					}).catch(error => {
-					    console.log(error);
-					});
+			const uploadVideo = async (dataUrl) => {
+				if(videoPathCheck(dataUrl)){
+					try {
+						const cdnUrl = await uploadMediaFromDataUrl(dataUrl, 'Videos', 'thejashari');
+						await sendImage(cdnUrl);
+						setUrl3('')
+					} catch (error) {
+						console.log(error);
+						toast('Upload failed', toastOptions);
+					}
 				}else{
 					toast("Audio/Image Format Detected!",toastOptions)
 					setUrl3('')
-					setLoader3(false);
 				}
+				setLoader3(false);
 			}
-			uploadImage(url3);
+			uploadVideo(url3);
 		}
 	},[url3])
 
@@ -429,84 +439,57 @@ export default function Messages({session}) {
 	useEffect(()=>{
 	if(url4){
 			setLoader4(true);
-			const uploadImage = (url4) =>{
-					imagekit.upload({
-				    file : url4,
-				    folder:"Pdfs", //required
-				    fileName : pdfName,   //required
-				    extensions: [
-				        {
-				            name: "google-auto-tagging",
-				            maxTags: 5,
-				            minConfidence: 95
-				        }
-				    ]
-					}).then(response => {
-					    sendImage(response.url);
-					    setUrl4('');
-					    setPdfName('');
-					    setLoader4(false)
-					}).catch(error => {
-					    console.log(error);
-					});	
+			const uploadPdf = async (dataUrl) => {
+				try {
+					const cdnUrl = await uploadMediaFromDataUrl(dataUrl, 'Pdfs', pdfName || 'document.pdf');
+					await sendImage(cdnUrl);
+					setUrl4('');
+					setPdfName('');
+				} catch (error) {
+					console.log(error);
+					toast('Upload failed', toastOptions);
+				}
+				setLoader4(false)
 			}
-			uploadImage(url4);
+			uploadPdf(url4);
 		}
 	},[url4])
 
 	useEffect(()=>{
 	if(url5){
 			setLoader5(true);
-			const uploadImage = (url5) =>{
-					imagekit.upload({
-				    file : url5,
-				    folder:"Zips", //required
-				    fileName : zipName,   //required
-				    extensions: [
-				        {
-				            name: "google-auto-tagging",
-				            maxTags: 5,
-				            minConfidence: 95
-				        }
-				    ]
-					}).then(response => {
-					    sendImage(response.url);
-					    setUrl5('');
-					    setZipName('');
-					    setLoader5(false)
-					}).catch(error => {
-					    console.log(error);
-					});	
+			const uploadZip = async (dataUrl) => {
+				try {
+					const cdnUrl = await uploadMediaFromDataUrl(dataUrl, 'Zips', zipName || 'archive.zip');
+					await sendImage(cdnUrl);
+					setUrl5('');
+					setZipName('');
+				} catch (error) {
+					console.log(error);
+					toast('Upload failed', toastOptions);
+				}
+				setLoader5(false)
 			}
-			uploadImage(url5);
+			uploadZip(url5);
 		}
 	},[url5])
 
 	useEffect(()=>{
 	if(url6){
-			const uploadImage = (url6) =>{
-					setLoader6(true);
-					imagekit.upload({
-				    file : url6,
-				    folder: "Codes", //required
-				    fileName : fileName,   //required
-				    extensions: [
-				        {
-				            name: "google-auto-tagging",
-				            maxTags: 5,
-				            minConfidence: 95
-				        }
-				    ]
-					}).then(response => {
-					    sendImage(response.url);
-					    setUrl6('');
-					    setFileName('');
-					    setLoader6(false)
-					}).catch(error => {
-					    console.log(error);
-					});	
+			const uploadCode = async (dataUrl) => {
+				setLoader6(true);
+				try {
+					const cdnUrl = await uploadMediaFromDataUrl(dataUrl, 'Codes', fileName || 'file');
+					await sendImage(cdnUrl);
+					setUrl6('');
+					setFileName('');
+				} catch (error) {
+					console.log(error);
+					toast('Upload failed', toastOptions);
+				}
+				setLoader6(false)
 			}
-			uploadImage(url6);
+			uploadCode(url6);
 		}
 	},[url6])
 
@@ -631,8 +614,10 @@ export default function Messages({session}) {
 				{currentUser?.backgroundImage && <img src={currentUser?.backgroundImage ? currentUser?.backgroundImage : "sir" } alt=" " className="h-full w-full absolute opacity-40 z-0"/>}
 				<div className={`w-full h-full ${currentUser?.backgroundImage ? "bg-black z-40" : "" } `} > 
 				<div className=" relative md:px-[70px] px-[10px] flex flex-col w-full h-full relative " >
-					<div className="flex flex-grow flex-col md:py-10 py-3 md:gap-8 gap-7 overflow-x-hidden
-					 scrollbar-none overflow-scroll">
+					<div
+					className="flex flex-grow flex-col md:py-10 py-3 md:gap-8 gap-7 overflow-x-hidden
+					 scrollbar-none overflow-scroll"
+					onScroll={handleMessagesScroll}>
 						{
 							messages?.map((msg)=>(
 								<MessageCard msg={msg} scrollRef={scrollRef} key={msg._id} tConvert={tConvert} 

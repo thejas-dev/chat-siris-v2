@@ -3,12 +3,13 @@ import {useEffect,useState} from 'react'
 import {useRouter} from 'next/router'
 import {signIn,useSession,getProviders,getSession} from 'next-auth/react'
 import axios from 'axios';
-import {loginRoutes,registerRoutes} from '../utils/ApiRoutes'
+import {loginRoutes,registerRoutes,oauthGoogleRoute} from '../utils/ApiRoutes'
+import {setAccessToken} from '../utils/authToken'
+import {setSocketUser, connectSocket} from '../service/socket'
 import {useRecoilState} from 'recoil'
 import {currentUserState} from '../atoms/userAtom'
 
 export default function Login({providers}) {
-	// body...
 	const router = useRouter();
 	const [ready,setReady] = useState(false)
 	const {data:session} = useSession();
@@ -29,33 +30,58 @@ export default function Login({providers}) {
 		router.push('/')
 	}
 
+	const finishAuth = (data) => {
+		if (data?.accessToken) {
+			setAccessToken(data.accessToken);
+		}
+		if (data?.user?._id) {
+			setSocketUser(data.user._id);
+		} else {
+			connectSocket();
+		}
+		if(!localStorage.getItem('chat-siris-2')){
+			localStorage.setItem('chat-siris-2',JSON.stringify(data?.user?.username));
+		}
+		setCurrentUser(data.user);
+		redirect();
+	}
+
 	const handleValidation = async() =>{
+		const idToken = session?.idToken;
+
+		if (idToken) {
+			try {
+				const {data} = await axios.post(
+					oauthGoogleRoute,
+					{ idToken },
+					{ withCredentials: true },
+				);
+				if (data.status === true) {
+					finishAuth(data);
+					return;
+				}
+			} catch (error) {
+				console.error('OAuth exchange failed', error);
+			}
+		}
+
 		let username = session?.user.name
 		let email = session?.user.email
 		let avatarImage = "https://ik.imagekit.io/d3kzbpbila/default_user_jxSUXOAmg.webp?ik-sdk-version=javascript-1.4.3&updatedAt=1669339183865";
 		let isAvatarImageSet = true
 		const {data} = await axios.post(loginRoutes,{
 			email,
-		});
+		}, { withCredentials: true });
 		if(data.status === false){
-			const {data} = await axios.post(registerRoutes,{
+			const {data: registerData} = await axios.post(registerRoutes,{
 				username,
 				email,
 				avatarImage,
 				isAvatarImageSet,
-			})
-			if(!localStorage.getItem('chat-siris-2')){
-				localStorage.setItem('chat-siris-2',JSON.stringify(data?.user?.username));
-			}
-			setCurrentUser(data.user);
-			console.log(data.user);
-			redirect();
+			}, { withCredentials: true });
+			finishAuth(registerData);
 		}else{
-			if(!localStorage.getItem('chat-siris-2')){
-				localStorage.setItem('chat-siris-2',JSON.stringify(data?.user?.username));
-			}
-			setCurrentUser(data?.user);
-			redirect();
+			finishAuth(data);
 		}
 	}
 
@@ -98,7 +124,6 @@ export default function Login({providers}) {
 
 export async function getServerSideProps(context){
 	const providers = await getProviders();
-	// const session = await getSession(context);
 	return{
 		props: {
 			providers,

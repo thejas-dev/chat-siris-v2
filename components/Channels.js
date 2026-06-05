@@ -1,6 +1,6 @@
 import {useState,useEffect} from 'react'
 import {BiSearchAlt2} from 'react-icons/bi';
-import axios from 'axios'
+import axiosClient from '../utils/axiosClient'
 import {useRecoilState} from 'recoil'
 import {currentUserState,revealMenuState,allChannelsState,searchChannelsState,channelAdminState,recordingState,
 	passTabOpenState,currentChannelState,groupSelectedState,userMessageState,loaderState,loaderState2,
@@ -14,9 +14,10 @@ import {AiOutlinePicture,AiOutlineLogout} from 'react-icons/ai'
 import Divider from '@mui/material/Divider';
 import {getAllChannelsRoutes,fetchUserRoom,addChannelToUser,addUserToChannel,
 	findChannelRoute,changeAdminOnlyRoute} from '../utils/ApiRoutes';
+import {mergeUserFromResponse,sameUserId} from '../utils/userMerge';
 import ChannelCard from './ChannelCard';
 import {signOut} from 'next-auth/react';
-import {socket} from '../service/socket';
+import {getSocket, connectSocket, joinChannelRoom} from '../service/socket';
 import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import FormGroup from '@mui/material/FormGroup';
@@ -48,22 +49,27 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 	const [loader6,setLoader6] = useRecoilState(loaderState6);
 	 
 	useEffect(()=>{
-		fetch();		
-		if(socket){
-			socket.on('fetch',()=>{
-				fetch();
-			})
-			socket.on('channelUpdate',(channelRef)=>{
-				setCurrentChannel(channelRef);
-			})
-			socket.on('channelDetailsUpdate',(data)=>{
-				setCurrentChannel(data);
-			})
+		fetch();
+		connectSocket();
+		const client = getSocket();
+		if(!client){
+			return undefined;
 		}
+		const onFetch = () => { fetch(); };
+		const onChannelUpdate = (channelRef) => { setCurrentChannel(channelRef); };
+		const onChannelDetailsUpdate = (data) => { setCurrentChannel(data); };
+		client.on('fetch', onFetch);
+		client.on('channelUpdate', onChannelUpdate);
+		client.on('channelDetailsUpdate', onChannelDetailsUpdate);
+		return () => {
+			client.off('fetch', onFetch);
+			client.off('channelUpdate', onChannelUpdate);
+			client.off('channelDetailsUpdate', onChannelDetailsUpdate);
+		};
 	},[])
 
 	const fetch = async() =>{
-		const {data} = await axios.get(getAllChannelsRoutes)
+		const {data} = await axiosClient.get(getAllChannelsRoutes)
 		setAllChannels(data.data)
 	} 
 
@@ -101,7 +107,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 	},[])
 
 	const fetchRoom = async(name) => {
-		const {data} = await axios.post(fetchUserRoom,{
+		const {data} = await axiosClient.post(fetchUserRoom,{
 			name
 		})
 		// console.log(data)
@@ -109,7 +115,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 			setGroupSelected(true);
 			setCurrentChannel(data?.data);
 			const channelRef = data?.data;
-			socket.emit('addUserToChannel',channelRef);
+			joinChannelRoom(channelRef);
 			if(data?.data?.adminId === currentUser?._id){
 				setChannelAdmin(true);
 			}
@@ -132,29 +138,28 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 				fetch();
 				setChannelAdmin(false);
 				setGroupSelected(false);
-				const data0 = await axios.post(fetchUserRoom,{
+				const data0 = await axiosClient.post(fetchUserRoom,{
 					name
 				})
 				const oldUsers = data0.data.data.users
 				let users = []
 				oldUsers.map((oldUser)=>{
-					if(oldUser._id !== currentUser._id){
+					if(!sameUserId(oldUser._id, currentUser._id)){
 						users.push(oldUser);
 					}
 				})
 				// console.log(users)
 				const inChannel = "";
-				const data1 = await axios.post(`${addUserToChannel}/${currentChannel._id}`,{
+				const data1 = await axiosClient.post(`${addUserToChannel}/${currentChannel._id}`,{
 					users
 				})		
 				// console.log(data1);
 				const channelRef = data1.data.obj;
-				socket.emit('RemoveUserFromChannel',channelRef);
-				const {data} = await axios.post(`${addChannelToUser}/${currentUser._id}`,{
+				getSocket()?.emit('RemoveUserFromChannel',channelRef);
+				const {data} = await axiosClient.post(`${addChannelToUser}/${currentUser._id}`,{
 					inChannel
 				})
-				// console.log(data.obj);
-				setCurrentUser(data.obj);
+				setCurrentUser(mergeUserFromResponse(currentUser, data, { inChannel }));
 				setCurrentChannel('');				
 			}else{
 				toast('Please Wait',toastOptions)
@@ -174,7 +179,7 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 	useEffect(()=>{
 		const fetch = async()=>{
 			const name = searchText
-			const {data} = await axios.post(findChannelRoute,{
+			const {data} = await axiosClient.post(findChannelRoute,{
 				name
 			})
 			if(data.data.length > 0){
@@ -197,12 +202,12 @@ export default function Channels({session,handleClose,handleToggle,handleToggle2
 
 	const handleAdminOnlyChange = async(e) => {
 		const adminOnly = e.target.checked;
-		const {data} = await axios.post(`${changeAdminOnlyRoute}/${currentChannel._id}`,{
+		const {data} = await axiosClient.post(`${changeAdminOnlyRoute}/${currentChannel._id}`,{
 			adminOnly
 		})
 		// console.log(data);
 		setCurrentChannel(data.obj);
-		socket.emit('channelUpdate',data.obj);
+		getSocket()?.emit('channelUpdate',data.obj);
 	}
 
 
