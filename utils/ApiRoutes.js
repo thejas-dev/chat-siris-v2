@@ -1,8 +1,9 @@
-export const host = "https://chat-siris-v2-server.vercel.app";
-
+export const host = process.env.NEXT_PUBLIC_GATEWAY_BASE;
 
 export const registerRoutes = `${host}/api/auth/register`;
 export const loginRoutes = `${host}/api/auth/login`;
+export const oauthGoogleRoute = `${host}/api/auth/oauth/google`;
+export const tokenRefreshRoute = `${host}/api/auth/token/refresh`;
 export const createChannelRoutes = `${host}/api/auth/createChannel`;
 export const getAllChannelsRoutes = `${host}/api/auth/getAllChannels`;
 export const sendMessageRoutes = `${host}/api/auth/sendMessage`;
@@ -15,5 +16,7 @@ export const updateBackground = `${host}/api/auth/deleteBackground`;
 export const updateName = `${host}/api/auth/updateName`;
 export const updateAvatarImage = `${host}/api/auth/updateAvatar`;
 export const findChannelRoute = `${host}/api/auth/findChannelRoute`;
-export const deleteMessageRoute =  `${host}/api/auth/deleteMessage`;
+export const deleteMessageRoute = `${host}/api/auth/deleteMessage`;
 export const changeAdminOnlyRoute = `${host}/api/auth/channelAdminUpdate`;
+export const mediaUploadInitRoute = `${host}/api/auth/media/upload-init`;
+export const mediaUploadCompleteRoute = `${host}/api/auth/media/upload-complete`;

@@ -5,19 +5,21 @@ import Head from 'next/head'
 import Channels from '../components/Channels'
 import Messages from '../components/Messages'
 import Backdrop from '@mui/material/Backdrop';
-import {createChannelRoutes,updateUser,updateBackground,updateName,updateAvatarImage} from '../utils/ApiRoutes'
+import {createChannelRoutes,updateUser,updateBackground,updateName,updateAvatarImage,loginRoutes} from '../utils/ApiRoutes'
+import {mergeUserFromResponse} from '../utils/userMerge'
+import {getAccessToken,setAccessToken} from '../utils/authToken'
 import {AiOutlineDelete} from 'react-icons/ai'
 import {MdEdit} from 'react-icons/md';
 import {RiGalleryUploadLine} from 'react-icons/ri'
 import {HiOutlineChevronUp} from 'react-icons/hi';
-import axios from 'axios';
+import axiosClient from '../utils/axiosClient';
 import Image from 'next/image';
 import {TfiGallery} from 'react-icons/tfi'
 import {useRecoilState} from 'recoil'
 import {currentUserState,currentChannelState,groupSelectedState,channelAdminState} from '../atoms/userAtom'
-import {socket} from '../service/socket';
+import {getSocket, connectSocket, setSocketUser, joinChannelRoom} from '../service/socket';
 import {VscCloseAll} from 'react-icons/vsc';
-import ImageKit from "imagekit"
+import {uploadMediaFromDataUrl} from '../utils/mediaUpload';
 import {toast,ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
 import TextField from '@mui/material/TextField';
@@ -29,11 +31,6 @@ import { styled } from '@mui/material/styles';
 const Home = () => {
     const router = useRouter();
     const {data:session} = useSession();
-    useEffect(()=>{
-        if(!session){
-          router.push('/login')
-      }
-  },[])
 
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
@@ -48,6 +45,37 @@ const Home = () => {
   const [groupSelected,setGroupSelected] = useRecoilState(groupSelectedState);
   const [channelAdmin,setChannelAdmin] = useRecoilState(channelAdminState);
   const [deleteConfirm,setDeleteConfirm] = useState(false);
+
+  useEffect(()=>{
+        if(!session){
+          router.push('/login')
+          return
+        }
+        if(!currentUser && session.user?.email){
+          axiosClient.post(loginRoutes, { email: session.user.email })
+            .then(({ data }) => {
+              if(data?.status && data?.user){
+                setCurrentUser(data.user)
+                if(data.accessToken){
+                  setAccessToken(data.accessToken)
+                }
+                if(data.user?._id){
+                  setSocketUser(data.user._id)
+                } else {
+                  connectSocket()
+                }
+              }
+            })
+            .catch((err) => console.error('Failed to restore user session', err))
+        }
+  },[session, currentUser, router, setCurrentUser])
+
+  useEffect(() => {
+    if (session && currentUser?._id && getAccessToken()) {
+      setSocketUser(currentUser._id)
+    }
+  }, [session, currentUser?._id])
+
   const [passTabVisible,setPassTabVisible] = useState(false);
   const [privacy,setPrivacy] = useState(false);
   const [userName,setUserName] = useState('');
@@ -59,12 +87,6 @@ const Home = () => {
   const [loader8,setLoader8] = useState(false);
   const [revealEdit,setRevealEdit] = useState(false)
   const [revealAvatarSettings,setRevealAvatarSettings] = useState(false);
-  const imagekit = new ImageKit({
-      publicKey : process.env.NEXT_PUBLIC_IMAGEKIT_ID,
-      privateKey : process.env.NEXT_PUBLIC_IMAGEKIT_PRIVATE,
-      urlEndpoint : process.env.NEXT_PUBLIC_IMAGEKIT_ENDPOINT
-  });
-
   const pathCheck = (path) =>{
     if(path){
       if(path.split('/').includes('data:image')){
@@ -111,35 +133,25 @@ const Home = () => {
 
   useEffect(()=>{
   if(url7){
-    // 
       setLoader7(true);
-      const uploadImage = (url7) =>{
-        if(pathCheck(url7)){
-          imagekit.upload({
-            file : url7, //required
-            fileName : "thejashari",   //required
-            extensions: [
-                {
-                    name: "google-auto-tagging",
-                    maxTags: 5,
-                    minConfidence: 95
-                }
-            ]
-          }).then(response => {
-            
-              // uploadBackground(response.url)
-              setUrl7('');
-              changeUserBackground(response.url);
-          }).catch(error => {
-              console.log(error);
-          });
+      const uploadBackgroundImage = async (dataUrl) => {
+        if(pathCheck(dataUrl)){
+          try {
+            const cdnUrl = await uploadMediaFromDataUrl(dataUrl, 'Images', 'thejashari');
+            setUrl7('');
+            await changeUserBackground(cdnUrl);
+          } catch (error) {
+            console.log(error);
+            toast('Upload failed', toastOptions);
+            setLoader7(false);
+          }
         }else{
           toast("Not an Image Format",toastOptions)
           setUrl7('')
           setLoader7(false);
         }
       }
-      uploadImage(url7);
+      uploadBackgroundImage(url7);
     }
   },[url7])
 
@@ -147,62 +159,54 @@ const Home = () => {
 
   useEffect(()=>{
   if(url8){
-    // 
       setLoader8(true);
-      const uploadImage = (url8) =>{
-        if(pathCheck(url8)){
-          imagekit.upload({
-            file : url8, //required
-            fileName : "thejashari",   //required
-            extensions: [
-                {
-                    name: "google-auto-tagging",
-                    maxTags: 5,
-                    minConfidence: 95
-                }
-            ]
-          }).then(response => {
-              changeAvatarImage(response.url);
-              setUrl8('');
-          }).catch(error => {
-              console.log(error);
-          });
+      const uploadAvatar = async (dataUrl) => {
+        if(pathCheck(dataUrl)){
+          try {
+            const cdnUrl = await uploadMediaFromDataUrl(dataUrl, 'Images', 'thejashari');
+            setUrl8('');
+            await changeAvatarImage(cdnUrl);
+          } catch (error) {
+            console.log(error);
+            toast('Upload failed', toastOptions);
+            setLoader8(false);
+          }
         }else{
           toast("Not an Image Format",toastOptions)
           setUrl8('')
           setLoader8(false);
         }
       }
-      uploadImage(url8);
+      uploadAvatar(url8);
     }
   },[url8])
 
 
 
   const changeUserBackground = async(backgroundImage) => {
-     const {data} = await axios.post(`${updateBackground}/${currentUser._id}`,{
+     const {data} = await axiosClient.post(`${updateBackground}/${currentUser._id}`,{
         backgroundImage
       })
-      setCurrentUser(data.obj);
+      setCurrentUser(mergeUserFromResponse(currentUser, data, { backgroundImage }));
       handleClose2();
       setLoader7(false);
   }
 
    const changeAvatarImage = async(avatarImage) => {
-     const {data} = await axios.post(`${updateAvatarImage}/${currentUser._id}`,{
+     const {data} = await axiosClient.post(`${updateAvatarImage}/${currentUser._id}`,{
         avatarImage
       })
-      setCurrentUser(data.obj);
+      setCurrentUser(mergeUserFromResponse(currentUser, data, { avatarImage }));
       handleClose2();
       setLoader8(false);
   }
 
   const deleteAvatarImage = async() => {
       const avatarImage = "https://ik.imagekit.io/d3kzbpbila/default_user_jxSUXOAmg.webp?ik-sdk-version=javascript-1.4.3&updatedAt=1669339183865";
-     const {data} = await axios.post(`${updateAvatarImage}/${currentUser._id}`,{
+     const {data} = await axiosClient.post(`${updateAvatarImage}/${currentUser._id}`,{
         avatarImage
       })
-      setCurrentUser(data.obj);
+      setCurrentUser(mergeUserFromResponse(currentUser, data, { avatarImage }));
       handleClose2();
       setLoader8(false);
   }
@@ -244,23 +248,23 @@ const Home = () => {
           let users = []
           users.push(currentUser);
           setChannelName('');setChannelDescription('');
-          const {data} = await axios.post(createChannelRoutes,{
+          const {data} = await axiosClient.post(createChannelRoutes,{
             name,description,admin,adminId,password,adminOnly,users,privacy
           })
           if(data.status === true){
             setCurrentChannel(data.group);
             const channelRef = data.group;
-            socket.emit('addUserToChannel',channelRef);
+            joinChannelRoom(channelRef);
           }
           const inChannel = name;
           admin = name;
-          const data2 = await axios.post(`${updateUser}/${currentUser._id}`,{
+          const data2 = await axiosClient.post(`${updateUser}/${currentUser._id}`,{
             inChannel,admin
           })
-          setCurrentUser(data2.data.obj);
+          setCurrentUser(mergeUserFromResponse(currentUser, data2.data, { inChannel, admin }));
           setGroupSelected(true);
           setChannelAdmin(true);
-          socket.emit('refetchChannels');
+          getSocket()?.emit('refetchChannels');
           handleClose();
           setPassTabVisible(false);
           setPassword('');
@@ -278,10 +282,10 @@ const Home = () => {
   const deleteBackgroundImageConfirm = async() => {
     if(deleteConfirm){
       const backgroundImage = ""
-      const {data} = await axios.post(`${updateBackground}/${currentUser._id}`,{
+      const {data} = await axiosClient.post(`${updateBackground}/${currentUser._id}`,{
         backgroundImage
       })
-      setCurrentUser(data.obj);
+      setCurrentUser(mergeUserFromResponse(currentUser, data, { backgroundImage: "" }));
       handleClose2();
     }else{
       setDeleteConfirm(true);
@@ -291,10 +295,10 @@ const Home = () => {
   const changeUserName = async(name) => {
     if(!currentUser.inChannel){
       const username = name;
-      const {data} = await axios.post(`${updateName}/${currentUser._id}`,{
+      const {data} = await axiosClient.post(`${updateName}/${currentUser._id}`,{
         username
       })
-      setCurrentUser(data.obj)
+      setCurrentUser(mergeUserFromResponse(currentUser, data, { username }))
     }else{
       toast('Please Exit From The Room to Edit your Profile',toastOptions)
     }

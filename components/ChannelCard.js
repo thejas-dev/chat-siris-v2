@@ -8,9 +8,10 @@ import {currentChannelState,groupSelectedState,revealMenuState,passTabOpenState,
 import {useRecoilState} from 'recoil';
 import {useState,useEffect} from 'react';
 import Backdrop from '@mui/material/Backdrop';
-import axios from 'axios';
+import axiosClient from '../utils/axiosClient';
 import {addUserToChannel,addChannelToUser,fetchUserRoom} from '../utils/ApiRoutes';
-import {socket} from '../service/socket';
+import {mergeUserFromResponse,sameUserId} from '../utils/userMerge';
+import {joinChannelRoom} from '../service/socket';
 import {toast} from 'react-toastify';
 
 
@@ -26,33 +27,46 @@ export default function ChannelCard({channel}) {
 	const [passTabOpen,setPassTabOpen] = useRecoilState(passTabOpenState);
 
 	const addUserToChannelFun = async() =>{
-		let name = channel.name;
-		let needToUpdate = true;
-		const data1 = await axios.post(fetchUserRoom,{
-			name
-		})
-		let users2 =  data1.data.data.users;
-		users2.map((user2)=>{
-			if(user2._id === currentUser._id){
-				needToUpdate = false
-			}	
-		})
-		if(needToUpdate){
-			const users=[...users2,currentUser]
-			const inChannel = channel.name
-			let {data} = await axios.post(`${addUserToChannel}/${channel._id}`,{
-				users
-			})		
-			setCurrentChannel(data.obj)
-			const channelRef = data.obj;
-			socket.emit('addUserToChannel',channelRef);
-			let data2 = await axios.post(`${addChannelToUser}/${currentUser._id}`,{
-				inChannel
+		try {
+			let name = channel.name;
+			let needToUpdate = true;
+			const data1 = await axiosClient.post(fetchUserRoom,{
+				name
 			})
-			setCurrentUser(data2.data.obj);
-			if(channel.adminId===currentUser._id){
-				setChannelAdmin(true);
-			}			
+			let users2 =  data1.data.data.users;
+			let channelRef = data1.data.data;
+			users2.map((user2)=>{
+				if(sameUserId(user2._id, currentUser._id)){
+					needToUpdate = false
+				}	
+			})
+			if(needToUpdate){
+				const userSnapshot = {
+					_id: String(currentUser._id),
+					username: currentUser.username,
+					avatarImage: currentUser.avatarImage ?? '',
+					isAvatarImageSet: Boolean(currentUser.isAvatarImageSet),
+				};
+				const users=[...users2, userSnapshot]
+				const inChannel = channel.name
+				let {data} = await axiosClient.post(`${addUserToChannel}/${channel._id}`,{
+					users
+				})		
+				channelRef = data.obj;
+				let data2 = await axiosClient.post(`${addChannelToUser}/${currentUser._id}`,{
+					inChannel
+				})
+				setCurrentUser(mergeUserFromResponse(currentUser, data2.data, { inChannel }));
+				if(sameUserId(channel.adminId, currentUser._id)){
+					setChannelAdmin(true);
+				}			
+			}
+			setCurrentChannel(channelRef);
+			joinChannelRoom(channelRef);
+		} catch (error) {
+			console.error('Failed to join channel', error);
+			toast('Unable to join channel. Please try again.', toastOptions);
+			setGroupSelected(false);
 		}
 	}
 
